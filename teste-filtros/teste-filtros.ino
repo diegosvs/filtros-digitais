@@ -2,7 +2,8 @@
 
 void setup()
 {
-    Serial.begin(9600);
+    Serial.begin(57600);
+    
     entrada::setup();
 }
 
@@ -10,9 +11,11 @@ void loop()
 {
     while (1)
     {
-        Serial.println(entrada::read());
+       Serial.print(entrada::readTemperatura());
+       Serial.print('\t');
+       Serial.println(entrada::readUmidade());
         
-        _delay_ms(50);
+        _delay_ms(100);
     }
     
 }
