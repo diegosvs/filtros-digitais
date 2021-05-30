@@ -5,19 +5,22 @@ class FiltroPassaBaixas
 
     private:
         float k;
-        float state;
+        float estado_filtro;
 
     public:
-        FiltroPassaBaixas(const float &k)
+        FiltroPassaBaixas(const float &constante_de_atenuacao)
         {
-            this->k = k;
+            this->k = constante_de_atenuacao;
         }
 
-    float update(const float &input)
+    
+    
+    
+    float update(const float &sinal_para_filtragem)
     {
-        this-> state = this->state * this->k + (1.f - this->k )* input;
+        this->estado_filtro = this->estado_filtro * this->k + (1.f - this->k )* sinal_para_filtragem;
 
-        return this->state;
+        return this->estado_filtro;
         
     }
 
