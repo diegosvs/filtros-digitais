@@ -8,7 +8,6 @@ namespace entrada
     void setup()
     {
         
-
         pinMode(VCC, OUTPUT);
         digitalWrite(VCC, HIGH);
 
