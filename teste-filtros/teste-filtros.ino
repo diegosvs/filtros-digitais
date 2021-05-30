@@ -1,4 +1,6 @@
 #include "input.hpp"
+#include "FiltroPassaBaixas.hpp"
+
 
 void setup()
 {
@@ -6,29 +8,36 @@ void setup()
     entrada::setup();
 }
 
-float filter_state = 0.f;
 
-const float k = 0.3;
 
-float _der = 0;
+FiltroPassaBaixas filtro_A (0.1);
+FiltroPassaBaixas filtro_B (0.7);
+FiltroPassaBaixas filtro_C (0.95);
+
+
+//float _der = 0;
 
 
 void loop()
 {
     while (1)
     {
-                              
-        /* filtro passa alta, fator k determina a taxa de decaimento até 0, quanto
-        menor k, mais rápido é o decaimento e maior é a passagem para altas frequencias e menos é
-        a passagem para baixas frequencias*/
+
+        float sinal_de_entrada = entrada::read();
         
-        const float tmp = entrada::read();
-                
-        filter_state = k * (filter_state + (tmp - _der)); 
-
-        _der = tmp; 
-
-        Serial.println(filter_state);
+        float sinal_filtro_a = filtro_A.update(sinal_de_entrada);
+        float sinal_filtro_a2 = filtro_B.update(sinal_filtro_a);
+        float sinal_filtro_a3 = filtro_C.update(sinal_filtro_a2);
+        
+                        
+        
+        Serial.print(sinal_de_entrada); Serial.print('\t');
+        Serial.print(sinal_filtro_a); Serial.print('\t');
+        Serial.print(sinal_filtro_a2); Serial.print('\t');
+        Serial.print(sinal_filtro_a3); Serial.print('\n');
+        
+        //Serial.print(sinal_filtro_saida); Serial.print('\n');
+        
         
         _delay_ms(100);
     }
