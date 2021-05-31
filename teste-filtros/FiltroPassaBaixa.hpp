@@ -1,6 +1,6 @@
 
 
-class FiltroPassaBaixas
+class FiltroPassaBaixa
 {
 
     private:
@@ -8,7 +8,7 @@ class FiltroPassaBaixas
         float estado_filtro;
 
     public:
-        FiltroPassaBaixas(const float &constante_de_atenuacao)
+        FiltroPassaBaixa(const float &constante_de_atenuacao)
         {
             this->k = constante_de_atenuacao;
         }

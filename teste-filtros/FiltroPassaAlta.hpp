@@ -3,7 +3,7 @@ class FiltroPassaAlta
 private:
     float k;
     float estado_do_filtro;
-    float _der;
+    float _der=0;
 
 public:
     FiltroPassaAlta(const float &constante_filtragem)
