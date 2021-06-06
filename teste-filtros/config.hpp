@@ -1,18 +1,13 @@
 
-namespace entrada
+namespace config
 {
     const uint8_t VCC = A0;
     const uint8_t GND = A5;
     const uint8_t TEMPERATURA = A2;
     const uint8_t UMIDADE = A4; 
 
-    
-
-
-    void setup()
+    void terminais()
     {
-        
-
         pinMode(VCC, OUTPUT);
         digitalWrite(VCC, HIGH);
 
@@ -24,14 +19,14 @@ namespace entrada
         
     }
 
-    inline float readTemperatura()
+    inline float lerTemperatura()
     {
         return analogRead(TEMPERATURA);
         //return digitalRead(TEMPERATURA);
         
     }
 
-    inline float readUmidade()
+    inline float lerUmidade()
     {
         //return digitalRead(UMIDADE);
         return analogRead(UMIDADE);
