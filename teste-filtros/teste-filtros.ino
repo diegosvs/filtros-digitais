@@ -1,12 +1,10 @@
 #include "config.hpp"
-#include "FiltroPassaAlta.hpp"
 #include "FiltroPassaBaixa.hpp"
 
 
 void setup()
 {
-    Serial.begin(57600);
-    
+    Serial.begin(57600);    
     config::terminais();
 }
 
@@ -18,7 +16,7 @@ void loop()
        Serial.print('\t');
        Serial.println(config::lerUmidade());
         
-        _delay_ms(100);
+        _delay_ms(70);
     }
     
 }
