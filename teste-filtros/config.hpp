@@ -3,8 +3,8 @@ namespace config
 {
     //const uint8_t VCC = A0;
     //const uint8_t GND = A5;
-    const uint8_t TEMPERATURA = A0;
-    const uint8_t UMIDADE = A5; 
+    const int TEMPERATURA = A0;
+    const int UMIDADE = A5; 
 
     void terminais()
     {
@@ -20,10 +20,10 @@ namespace config
         
     }
 
-    inline float lerTemperatura()
+    float lerTemperatura()
     {
-        float leitura_ad_temperatura = analogRead(TEMPERATURA);
-        float valor_temperatura;
+        //float leitura_ad_temperatura = analogRead(TEMPERATURA);
+        //float valor_temperatura = leitura_ad_temperatura;
         
         /*
                     // Conexão do termistor
@@ -69,30 +69,29 @@ namespace config
             }
                     */
 
-
-        return valor_temperatura;
+        return analogRead(TEMPERATURA);
+        //return valor_temperatura;
     }
 
-    inline float lerUmidade()
+    float lerUmidade()
     {
             /*
-        5V / 1023bits= 0,0048V/bit
-        0%    ur --> 0,826V --> 172 bits
-        75,3% ur --> 3,198V --> 666 bits 
-        666 - 172 = 494 divisões
-        494 / 75,3 = 6,56 --> 0,1% ur
+        5V / 1023bits= 0,0032V/bit
+        0%    ur --> 0,826V --> 258 bits
+        75,3% ur --> 3,198V --> 999 bits 
+        666 - 172 = 741 divisões
+        741 / 75,3 = 9,84 --> 0,1% ur
         */
 
         float leitura_ad_umidade = analogRead(UMIDADE);
-        float valor_umidade = (leitura_ad_umidade - 172.f) / 6.56f;
-       
-
-        if (leitura_ad_umidade < 172.f)
+        
+        float valor_umidade = (leitura_ad_umidade - 258.f) / 9.84f;
+        if (leitura_ad_umidade < 258.f)
         {
             return valor_umidade = 0.f;
         }
 
-        else if (leitura_ad_umidade >= 828.f)
+        else if (leitura_ad_umidade >= 1242.f)
         {
             return valor_umidade = 100.f;
         }       
@@ -100,6 +99,7 @@ namespace config
         else
         {      
             return valor_umidade;
-        }
+        }      
+        
     }
 }
