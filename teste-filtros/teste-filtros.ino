@@ -1,4 +1,4 @@
-#include "config.hpp"
+
 #include "FiltroPassaBaixa.hpp"
 #include "Temperatura.hpp"
 #include "Umidade.hpp"
@@ -14,24 +14,25 @@ void setup()
     //config::terminais();
 }
 
-Temperatura temperatura1(A0, 5, 18000);
-Umidade umidade1(A5, 5);
+Temperatura temperatura1(5, 10000);
+Umidade umidade1(5);
+DSP::FiltroPassaBaixa filtro_t(0.3, 0.05);
+DSP::FiltroPassaBaixa filtro_u(0.3, 0.05);
 
 void loop()
 {
     while (1)
     {   
-        //float leitura_ad_temperatura = config::lerTemperatura();
+        const float temp_ad = filtro_t.update(analogRead(A0));
+        const float umid_ad = filtro_u.update(analogRead(A5));
 
-        //Serial.print(leitura_ad_temperatura);
-
-        Serial.print(temperatura1.lerTemperatura());
+        Serial.print(temperatura1.lerTemperatura(temp_ad));
         Serial.print('\t');
-        Serial.print(umidade1.lerUmidade());
+        Serial.print(umidade1.lerUmidade(umid_ad));
         //Serial.println(config::lerUmidade());
         Serial.print('\n');
 
-        _delay_ms(100);
+        _delay_ms(50);
     }
     
 }

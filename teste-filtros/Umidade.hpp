@@ -1,20 +1,20 @@
 class Umidade
 {
 private:
-    const int terminal;
+    //const int terminal;
     const float fator;
-    const float boia;
+    
        
     
 public:
-    Umidade(const int &_terminal,
+    Umidade(//const int &_terminal,
             const float &_tensao_alimentacao) :
-            terminal(_terminal),
+            //terminal(_terminal),
             fator(_tensao_alimentacao / 1023.0f)
             {}
 
 
-    float lerUmidade()
+    float lerUmidade(const float &_sinal_ad)
     {
         /*
         5V / 1023bits= 0,0032V/bit
@@ -32,12 +32,12 @@ public:
         */
 
         
-        float leitura_ad_umidade = analogRead(terminal);
+        //float leitura_ad_umidade = analogRead(terminal);
 
-        float valor_umidade = (leitura_ad_umidade * fator - 169.f * fator) / 0.0315f;
+        float valor_umidade = (_sinal_ad * fator - 169.f * fator) / 0.0315f;
         
             return valor_umidade;
-            //return leitura_ad_umidade;
+            //return _sinal_ad;
         
     }
 };
