@@ -5,9 +5,13 @@
 
 
 void setup()
-{
-    Serial.begin(57600);    
-    config::terminais();
+{   
+    const int A0;
+    const int A5;
+    pinMode(A0, INPUT);
+    pinMode(A5, INPUT);   
+    Serial.begin(57600);
+    //config::terminais();
 }
 
 Temperatura temperatura1(A0, 5, 18000);
@@ -23,9 +27,10 @@ void loop()
 
         Serial.print(temperatura1.lerTemperatura());
         Serial.print('\t');
-        Serial.println(umidade1.lerUmidade());
+        Serial.print(umidade1.lerUmidade());
         //Serial.println(config::lerUmidade());
-        
+        Serial.print('\n');
+
         _delay_ms(100);
     }
     
