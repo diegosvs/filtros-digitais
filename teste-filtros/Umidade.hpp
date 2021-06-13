@@ -1,16 +1,22 @@
+namespace TH
+{
+
 class Umidade
 {
 private:
-    //const int terminal;
+    const float resolucao_ad;
     const float fator;
+    const float off_set;
     
        
     
 public:
-    Umidade(//const int &_terminal,
-            const float &_tensao_alimentacao) :
-            //terminal(_terminal),
-            fator(_tensao_alimentacao / 1023.0f)
+    Umidade(const float &_resolucao_ad,
+            const float &_tensao_alimentacao,
+            const float &_off_set) :
+            resolucao_ad(_resolucao_ad),
+            fator(_tensao_alimentacao / resolucao_ad),
+            off_set(_off_set)
             {}
 
 
@@ -34,10 +40,11 @@ public:
         
         //float leitura_ad_umidade = analogRead(terminal);
 
-        float valor_umidade = (_sinal_ad * fator - 169.f * fator) / 0.0315f;
+        float valor_umidade = (_sinal_ad * fator - off_set * fator) / 0.0315f;
         
-            return valor_umidade;
+            return (valor_umidade,1);
             //return _sinal_ad;
         
     }
 };
+}
