@@ -29,12 +29,13 @@ void loop()
         const float umid_ad = filtro_u.update(analogRead(A5));
 
         Serial.print(temperatura1.lerTemperatura(temp_ad),1);
-        Serial.print('\t');
+        Serial.print('\t');        
+        //Serial.print(umidade1.lerUmidade(analogRead(A5)),1);
+        //Serial.print('\t');
         Serial.print(umidade1.lerUmidade(umid_ad),1);
-        //Serial.println(config::lerUmidade());
         Serial.print('\n');
 
-        _delay_ms(50);
+        _delay_ms(80);
     }
     
 }
