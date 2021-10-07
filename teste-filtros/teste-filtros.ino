@@ -9,7 +9,7 @@
 #include <DHT.h>
 //#include "WiFi.h"      //ESP32
 #include <ESP8266WiFi.h> //ESP8266
-//#include <ThingsBoard.h>
+
 
 
 #define WIFI_AP "YOUR_WIFI_AP"
@@ -21,12 +21,10 @@
 #define DHTPIN 4
 #define DHTTYPE DHT22
 
-// TH::Temperatura       temperatura1(12, 17920); // argumentos (resolução AD, resistor serie do NTC)
-// TH::Umidade           umidade1(12, 3.3, 500);  // argumentos (resolução AD, tensao de alimentacao, offset)
+TH::Temperatura       temperatura1(12, 17920); // argumentos (resolução AD, resistor serie do NTC)
+TH::Umidade           umidade1(12, 3.3, 500);  // argumentos (resolução AD, tensao de alimentacao, offset)
 // DSP::FiltroPassaBaixa filtro_temperatura(0.1, 0.05); // argumentos (Hz, tempo de amostragem)
 // DSP::FiltroPassaBaixa filtro_umidade(0.1, 0.05);
-
-char thingsboardServer[] = "YOUR_THINGSBOARD_HOST_OR_IP";
 
 WiFiClient wifiClient;
 
@@ -35,11 +33,16 @@ DHT dht(DHTPIN, DHTTYPE);
 
 PubSubClient client(wifiClient);
 
+char thingsboardServer[] = "YOUR_THINGSBOARD_HOST_OR_IP";
+
 int status = WL_IDLE_STATUS;
+
 unsigned long lastSend;
 
 void setup()
 {
+
+config::setup();
 Serial.begin(9600);
 dht.begin();
 delay(10);
@@ -50,16 +53,18 @@ lastSend = 0;
 
 void loop()
 {
+
 if ( !client.connected() ) {
 reconnect();
 }
 
-if ( millis() - lastSend > 1000 ) { // Update and send only after 1 seconds
+if ( millis() - lastSend > 30000 ) { // Update and send only after 1 seconds
 getAndSendTemperatureAndHumidityData();
 lastSend = millis();
 }
 
 client.loop();
+
 }
 
 void getAndSendTemperatureAndHumidityData()
@@ -67,9 +72,14 @@ void getAndSendTemperatureAndHumidityData()
 Serial.println("Collecting temperature data.");
 
 // Reading temperature or humidity takes about 250 milliseconds!
-float h = dht.readHumidity();
+// float h = dht.readHumidity();
+umidade_ad = config::sinalADUmidade();
+const float h = umidade1.lerUmidade(umidade_ad);
+
 // Read temperature as Celsius (the default)
-float t = dht.readTemperature();
+// float t = dht.readTemperature();
+const float temperatura_ad = config::sinalADTemperatura();        
+const float t = temperatura1.lerTemperatura(temperatura_ad);
 
 // Check if any reads failed and exit early (to try again).
 if (isnan(h) || isnan(t)) {
@@ -115,39 +125,55 @@ Serial.println("Connecting to AP ...");
 
 WiFi.begin(WIFI_AP, WIFI_PASSWORD);
 while (WiFi.status() != WL_CONNECTED) {
-delay(500);
-Serial.print(".");
+
+digitalWrite(LED_BUILTIN, LOW);
+                delay(100);
+                digitalWrite(LED_BUILTIN, HIGH);
+                delay(400);
 }
 Serial.println("Connected to AP");
 }
 
+void reconnect()
+{
+    // Loop until we're reconnected
+    while (!client.connected())
+    {
+        status = WiFi.status();
+        if (status != WL_CONNECTED)
+        {
+            WiFi.begin(WIFI_AP, WIFI_PASSWORD);
+            while (WiFi.status() != WL_CONNECTED)
+            {
+                digitalWrite(LED_BUILTIN, LOW);
+                delay(100);
+                digitalWrite(LED_BUILTIN, HIGH);
+                delay(400);
+                
+                Serial.print(".");
+            }
+            Serial.println("Connected to AP");
+        }
 
-void reconnect() {
-// Loop until we're reconnected
-while (!client.connected()) {
-status = WiFi.status();
-if ( status != WL_CONNECTED) {
-WiFi.begin(WIFI_AP, WIFI_PASSWORD);
-while (WiFi.status() != WL_CONNECTED) {
-delay(500);
-Serial.print(".");
+        Serial.print("Connecting to Thingsboard node ...");
+        // Attempt to connect (clientId, username, password)
+        if (client.connect("ESP8266 Device", TOKEN, NULL))
+        {
+            Serial.println("[DONE]");
+            digitalWrite(LED_BUILTIN, LOW);
+        }
+        else
+        {
+            Serial.print("[FAILED] [ rc = ");
+            Serial.print(client.state());
+            Serial.println(" : retrying in 5 seconds]");
+            // Wait 5 seconds before retrying
+            digitalWrite(LED_BUILTIN, HIGH);
+            delay(5000);
+            
+        }
+    }
 }
-Serial.println("Connected to AP");
-}
-Serial.print("Connecting to Thingsboard node ...");
-// Attempt to connect (clientId, username, password)
-if ( client.connect("ESP8266 Device", TOKEN, NULL) ) {
-Serial.println( "[DONE]" );
-} else {
-Serial.print( "[FAILED] [ rc = " );
-Serial.print( client.state() );
-Serial.println( " : retrying in 5 seconds]" );
-// Wait 5 seconds before retrying
-delay( 5000 );
-}
-}
-}
-
 
 // #define HOSTIP "10.66.0.63:8080"
 // #define TOKEN "WpskTXZMUuk7UDRodXl7"
