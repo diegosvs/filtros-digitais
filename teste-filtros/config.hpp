@@ -1,23 +1,33 @@
 namespace config
 {
-    const int sinal_t = 32; //adc1_ch4 gpio 32
-    const int sinal_h = 33; //adc1_ch5 gpio 33
+    int terminal_ad = A0;
+
+    int terminal_umidade = 10;    //D1 - GPIO5
+    int terminal_temperatura = 9; //D0 - GPIO16
 
     void setup()
     {
-        pinMode(2, OUTPUT);
-        pinMode(sinal_t, INPUT);
-        pinMode(sinal_h, INPUT);
+        pinMode(terminal_ad, INPUT);
+        pinMode(terminal_umidade, OUTPUT);
+        pinMode(terminal_temperatura, OUTPUT);
+        digitalWrite(terminal_temperatura, HIGH);
+        digitalWrite(terminal_umidade, HIGH);
     }
 
-    inline float sinalADTemperatura()
+    inline float sinalAD()
     {
-        return analogRead(sinal_t);
+        return analogRead(terminal_ad);
     }
 
-    inline float sinalADUmidade()
+    void ativaTemperatura()
     {
-        return analogRead(sinal_h);
+        digitalWrite(terminal_temperatura, LOW);
+        digitalWrite(terminal_umidade, HIGH);
     }
 
+    void ativaUmidade()
+    {
+        digitalWrite(terminal_umidade, LOW);
+        digitalWrite(terminal_temperatura, HIGH);
+    }
 } // namespace config
