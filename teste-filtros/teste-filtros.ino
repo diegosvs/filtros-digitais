@@ -3,39 +3,40 @@
 #include "Temperatura.hpp"
 #include "Umidade.hpp"
 #include "config.hpp"
-#include <PubSubClient.h>
+// #include <PubSubClient.h>
 #include <ArduinoJson.h>
 #include <ArduinoHttpClient.h>
-#include <DHT.h>
-//#include "WiFi.h"      //ESP32
-#include <ESP8266WiFi.h> //ESP8266
+// #include <DHT.h>
+// #include "WiFi.h"      //ESP32
+//#include <ESP8266WiFi.h> //ESP8266
 
-#define WIFI_AP "IPT-WiFi"
-#define WIFI_PASSWORD "germ@nium"
+// #define WIFI_AP "IPT-WiFi"
+// #define WIFI_PASSWORD "germ@nium"
 
-#define TOKEN "lmmthg003"
+// #define TOKEN "lmmthg003"
 
 // DHT
-// #define DHTPIN 4
+// #define AQUISICAO 4
 // #define DHTTYPE DHT22
 
-TH::Temperatura temperatura1(10, 17920); // argumentos (resolução AD, resistor serie do NTC)
-TH::Umidade umidade1(10, 3.3, 500);      // argumentos (resolução AD, tensao de alimentacao, offset)
-// DSP::FiltroPassaBaixa filtro_temperatura(0.1, 0.05); // argumentos (Hz, tempo de amostragem)
-// DSP::FiltroPassaBaixa filtro_umidade(0.1, 0.05);
+TH::Temperatura temperatura1(10, 5000); // argumentos (resolução AD, resistor serie do NTC)
+TH::Umidade umidade1(10, 3.3, 170);      // argumentos (resolução AD, tensao de alimentacao, offset)
+DSP::FiltroPassaBaixa filtro_temperatura(0.1, 0.05); // argumentos (Hz, tempo de amostragem)
+DSP::FiltroPassaBaixa filtro_umidade(0.1, 0.05);
 
-WiFiClient wifiClient;
+// WiFiClient wifiClient;
 
-// Initialize DHT sensor.
-// DHT dht(DHTPIN, DHTTYPE);
+// // Initialize DHT sensor.
+// // DHT dht(DHTPIN, DHTTYPE);
 
-PubSubClient client(wifiClient);
+// PubSubClient client(wifiClient);
 
-char thingsboardServer[] = "iothmlsice.ipt.br";
+// char thingsboardServer[] = "iothmlsice.ipt.br";
 
-int status = WL_IDLE_STATUS;
+// int status = WL_IDLE_STATUS;
 
 unsigned long lastSend;
+unsigned long comutar;
 
 void setup()
 {
@@ -47,6 +48,8 @@ void setup()
     // InitWiFi();
     // client.setServer(thingsboardServer, 1883);
     lastSend = 0;
+    comutar = 0;
+
 }
 
 void loop()
@@ -57,30 +60,44 @@ void loop()
     //     reconnect();
     // }
 
-    if (millis() - lastSend > 1000)
+    if (millis() - lastSend > 10000)
     { // Update and send only after 1 seconds
         getAndSendTemperatureAndHumidityData();
         lastSend = millis();
+    }
+   
+    if (millis() - comutar > 50)
+    { // Update and send only after 1 seconds
+        chaveamento();
+        comutar = millis();
     }
 
     // client.loop();
 }
 
+void chaveamento()
+{
+    config::ativaTemperatura();
+    const float t = filtro_temperatura.update(temperatura1.lerTemperatura(config::sinalAD()));
+    config::ativaUmidade();
+    const float h = filtro_umidade.update(umidade1.lerUmidade(config::sinalAD()));
+}
+
 void getAndSendTemperatureAndHumidityData()
 {
-    Serial.println("Collecting temperature data.");
+    Serial.println("");
 
     // Reading temperature or humidity takes about 250 milliseconds!
     // float h = dht.readHumidity();
 
     config::ativaUmidade();
-    const float h = umidade1.lerUmidade(config::sinalAD());
-    delay(100);
+        const float h = filtro_umidade.update(umidade1.lerUmidade(config::sinalAD()));
+    delay(20);
 
     // Read temperature as Celsius (the default)
     // float t = dht.readTemperature();
     config::ativaTemperatura();
-    const float t = temperatura1.lerTemperatura(config::sinalAD());
+         const float t = filtro_temperatura.update(temperatura1.lerTemperatura(config::sinalAD()));
 
     // Check if any reads failed and exit early (to try again).
     if (isnan(h) || isnan(t))
@@ -88,6 +105,7 @@ void getAndSendTemperatureAndHumidityData()
         Serial.println("Failed to read from DHT sensor!");
         return;
     }
+   
 
     Serial.print("Humidity: ");
     Serial.print(h);
@@ -99,84 +117,84 @@ void getAndSendTemperatureAndHumidityData()
     String temperature = String(t);
     String humidity = String(h);
 
-    // Just debug messages
-    Serial.print("Sending temperature and humidity : [");
-    Serial.print(temperature);
-    Serial.print(",");
-    Serial.print(humidity);
-    Serial.print("] -> ");
+    // // Just debug messages
+    // Serial.print("Sending temperature and humidity : [");
+    // Serial.print(temperature);
+    // Serial.print(",");
+    // Serial.print(humidity);
+    // Serial.print("] -> ");
 
-//     // Prepare a JSON payload string
-//     String payload = "{";
-//     payload += "\"temperature\":";
-//     payload += temperature;
-//     payload += ",";
-//     payload += "\"humidity\":";
-//     payload += humidity;
-//     payload += "}";
+    // // Prepare a JSON payload string
+    // String payload = "{";
+    // payload += "\"temperature\":";
+    // payload += temperature;
+    // payload += ",";
+    // payload += "\"humidity\":";
+    // payload += humidity;
+    // payload += "}";
 
 //     // Send payload
 //     char attributes[100];
 //     payload.toCharArray(attributes, 100);
 //     client.publish("v1/devices/me/telemetry", attributes);
 //     Serial.println(attributes);
+}
+
+// void InitWiFi()
+// {
+//     Serial.println("Connecting to AP ...");
+//     // attempt to connect to WiFi network
+
+//     WiFi.begin(WIFI_AP, WIFI_PASSWORD);
+//     while (WiFi.status() != WL_CONNECTED)
+//     {
+//         digitalWrite(LED_BUILTIN, LOW);
+//         delay(100);
+//         digitalWrite(LED_BUILTIN, HIGH);
+//         delay(400);
+//     }
+//     Serial.println("Connected to AP");
 // }
 
-void InitWiFi()
-{
-    Serial.println("Connecting to AP ...");
-    // attempt to connect to WiFi network
+// void reconnect()
+// {
+//     // Loop until we're reconnected
+//     while (!client.connected())
+//     {
+//         status = WiFi.status();
+//         if (status != WL_CONNECTED)
+//         {
+//             WiFi.begin(WIFI_AP, WIFI_PASSWORD);
+//             while (WiFi.status() != WL_CONNECTED)
+//             {
+//                 digitalWrite(LED_BUILTIN, LOW);
+//                 delay(100);
+//                 digitalWrite(LED_BUILTIN, HIGH);
+//                 delay(400);
 
-    WiFi.begin(WIFI_AP, WIFI_PASSWORD);
-    while (WiFi.status() != WL_CONNECTED)
-    {
-        digitalWrite(LED_BUILTIN, LOW);
-        delay(100);
-        digitalWrite(LED_BUILTIN, HIGH);
-        delay(400);
-    }
-    Serial.println("Connected to AP");
-}
+//                 Serial.print(".");
+//             }
+//             Serial.println("Connected to AP");
+//         }
 
-void reconnect()
-{
-    // Loop until we're reconnected
-    while (!client.connected())
-    {
-        status = WiFi.status();
-        if (status != WL_CONNECTED)
-        {
-            WiFi.begin(WIFI_AP, WIFI_PASSWORD);
-            while (WiFi.status() != WL_CONNECTED)
-            {
-                digitalWrite(LED_BUILTIN, LOW);
-                delay(100);
-                digitalWrite(LED_BUILTIN, HIGH);
-                delay(400);
-
-                Serial.print(".");
-            }
-            Serial.println("Connected to AP");
-        }
-
-        Serial.print("Connecting to Thingsboard node ...");
-        // Attempt to connect (clientId, username, password)
-        if (client.connect("ESP8266 Device", TOKEN, NULL))
-        {
-            Serial.println("[DONE]");
-            digitalWrite(LED_BUILTIN, LOW);
-        }
-        else
-        {
-            Serial.print("[FAILED] [ rc = ");
-            Serial.print(client.state());
-            Serial.println(" : retrying in 5 seconds]");
-            // Wait 5 seconds before retrying
-            digitalWrite(LED_BUILTIN, HIGH);
-            delay(5000);
-        }
-    }
-}
+//         Serial.print("Connecting to Thingsboard node ...");
+//         // Attempt to connect (clientId, username, password)
+//         if (client.connect("ESP8266 Device", TOKEN, NULL))
+//         {
+//             Serial.println("[DONE]");
+//             digitalWrite(LED_BUILTIN, LOW);
+//         }
+//         else
+//         {
+//             Serial.print("[FAILED] [ rc = ");
+//             Serial.print(client.state());
+//             Serial.println(" : retrying in 5 seconds]");
+//             // Wait 5 seconds before retrying
+//             digitalWrite(LED_BUILTIN, HIGH);
+//             delay(5000);
+//         }
+//     }
+// }
 
 // #define HOSTIP "10.66.0.63:8080"
 // #define TOKEN "WpskTXZMUuk7UDRodXl7"

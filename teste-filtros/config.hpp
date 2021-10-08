@@ -2,8 +2,8 @@ namespace config
 {
     int terminal_ad = A0;
 
-    int terminal_umidade = 10;    //D1 - GPIO5
-    int terminal_temperatura = 9; //D0 - GPIO16
+    int terminal_umidade = 8;    //D1 - GPIO5
+    int terminal_temperatura = 7; //D0 - GPIO16
 
     void setup()
     {

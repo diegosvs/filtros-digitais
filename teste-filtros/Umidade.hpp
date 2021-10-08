@@ -39,7 +39,7 @@ namespace TH
 
             //float leitura_ad_umidade = analogRead(terminal);
 
-            float valor_umidade = ((_sinal_ad - off_set) * fator);
+            float valor_umidade = ((_sinal_ad + off_set) * fator);
 
             return valor_umidade;
         }
