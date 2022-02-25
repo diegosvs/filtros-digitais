@@ -12,35 +12,29 @@
 
 #define BAUDE_RATE 9600
 
-#define TOKEN "lmmthg003"
-#define TEMPO_DADO_BROKER 5 // tempo em minutos para aquisição no broker da thingsboard
+#define TOKEN "lmmthg005"
+#define TEMPO_DADO_BROKER 0.1 // tempo em minutos para aquisição no broker da thingsboard
 
-// #define WIFI_AP "fran"
-// #define WIFI_PASSWORD "d13g0vrede"
 #define WIFI_AP "IPT-WiFi"
-#define WIFI_PASSWORD "germ@nium"
+#define WIFI_PASSWORD "the@trum"
 
-#define FILTRO 0.05               //filtro em Hz para condicionamento dos sinais
+#define FILTRO 0.08               //filtro em Hz para condicionamento dos sinais
 #define AMOSTRAGEM_DO_FILTRO 0.05 //amostragem do filtro em segundos
 
-#define RESOLUCAO_CONDICIONADOR 10 // resolucao do conversor em bits
-#define RESISTOR_SERIE 10000
+#define OFFSET_HIGROMETRO -20
+#define OFFSET_TERMOMETRO 0
+#define RESISTOR_SERIE 9820
 #define TENSAO_ALIMENTACAO 3.3
-#define OFFSET_HIGROMETRO 380
+#define RESOLUCAO_CONDICIONADOR 10 // resolucao do conversor em bits
 
-// DHT
-// #define AQUISICAO 4
-// #define DHTTYPE DHT22
 
-TH::Temperatura temperatura1(RESOLUCAO_CONDICIONADOR, RESISTOR_SERIE);                // argumentos (resolução AD, resistor serie do NTC)
+TH::Temperatura temperatura1(RESOLUCAO_CONDICIONADOR, RESISTOR_SERIE,OFFSET_TERMOMETRO);                // argumentos (resolução AD, resistor serie do NTC)
 TH::Umidade umidade1(RESOLUCAO_CONDICIONADOR, TENSAO_ALIMENTACAO, OFFSET_HIGROMETRO); // argumentos (resolução AD, tensao de alimentacao, offset)
 DSP::FiltroPassaBaixa filtro_temperatura(FILTRO, AMOSTRAGEM_DO_FILTRO);               // argumentos (Hz, tempo de amostragem)
 DSP::FiltroPassaBaixa filtro_umidade(FILTRO, AMOSTRAGEM_DO_FILTRO);
 
 WiFiClient wifiClient;
 
-// Initialize DHT sensor.
-// DHT dht(DHTPIN, DHTTYPE);
 
 PubSubClient client(wifiClient);
 
@@ -56,7 +50,6 @@ void setup()
     Serial.begin(BAUDE_RATE);
     config::setup();
 
-    // dht.begin();
     delay(10);
     InitWiFi();
     client.setServer(thingsboardServer, 1883);
@@ -72,18 +65,20 @@ void loop()
         reconnect();
     }
 
-    if (millis() - lastSend > (TEMPO_DADO_BROKER * 60000))
-    { // Update and send only after 1 seconds
-        getAndSendTemperatureAndHumidityData();
-        lastSend = millis();
-    }
-
     if (millis() - comutar > (AMOSTRAGEM_DO_FILTRO * 1000))
     { // Update and send only after 1 seconds
         chaveamento();
         comutar = millis();
     }
 
+
+    if (millis() - lastSend > (TEMPO_DADO_BROKER * 60000))
+    { // Update and send only after 1 seconds
+        getAndSendTemperatureAndHumidityData();
+        lastSend = millis();
+    }
+
+    
     client.loop();
 }
 
@@ -97,14 +92,9 @@ void chaveamento()
 
 void getAndSendTemperatureAndHumidityData()
 {
-
-    // float h = dht.readHumidity();
-
     config::ativaUmidade();
     const float h = filtro_umidade.update(umidade1.lerUmidade(config::sinalAD()));
-    delay(20);
-
-    // float t = dht.readTemperature();
+    
     config::ativaTemperatura();
     const float t = filtro_temperatura.update(temperatura1.lerTemperatura(config::sinalAD()));
 
@@ -134,10 +124,10 @@ void getAndSendTemperatureAndHumidityData()
 
     // Prepare a JSON payload string
     String payload = "{";
-    payload += "\"temperature\":";
+    payload += "\"temperatura\":";
     payload += temperature;
     payload += ",";
-    payload += "\"humidity\":";
+    payload += "\"umidade\":";
     payload += humidity;
     payload += "}";
 
@@ -156,10 +146,8 @@ void InitWiFi()
     WiFi.begin(WIFI_AP, WIFI_PASSWORD);
     while (WiFi.status() != WL_CONNECTED)
     {
-        digitalWrite(LED_BUILTIN, LOW);
+        //digitalWrite(LED_BUILTIN, LOW);
         delay(100);
-        digitalWrite(LED_BUILTIN, HIGH);
-        delay(400);
     }
     Serial.println("Connected to AP");
 }
@@ -175,11 +163,9 @@ void reconnect()
             WiFi.begin(WIFI_AP, WIFI_PASSWORD);
             while (WiFi.status() != WL_CONNECTED)
             {
-                digitalWrite(LED_BUILTIN, LOW);
+                //digitalWrite(LED_BUILTIN, LOW);
                 delay(100);
-                digitalWrite(LED_BUILTIN, HIGH);
-                delay(400);
-
+                
                 Serial.print(".");
             }
             Serial.println("Connected to AP");
@@ -190,15 +176,16 @@ void reconnect()
         if (client.connect("ESP8266 Device", TOKEN, NULL))
         {
             Serial.println("[DONE]");
-            digitalWrite(LED_BUILTIN, LOW);
+            //digitalWrite(LED_BUILTIN, LOW);
         }
+
         else
         {
             Serial.print("[FAILED] [ rc = ");
             Serial.print(client.state());
             Serial.println(" : retrying in 5 seconds]");
             // Wait 5 seconds before retrying
-            digitalWrite(LED_BUILTIN, HIGH);
+            //digitalWrite(LED_BUILTIN, LOW);
             delay(5000);
         }
     }
