@@ -6,35 +6,39 @@
 #include <ArduinoJson.h>
 #include <ArduinoHttpClient.h>
 #include <PubSubClient.h>
-//#include <DHT.h>
+#include <DHT.h>
 //#include "WiFi.h"      //ESP32
 #include <ESP8266WiFi.h> //ESP8266
 
 #define BAUDE_RATE 9600
 
-#define TOKEN "lmmthg005"
+#define TOKEN "lmmthg004"
 #define TEMPO_DADO_BROKER 0.1 // tempo em minutos para aquisição no broker da thingsboard
+
 
 #define WIFI_AP "IPT-WiFi"
 #define WIFI_PASSWORD "the@trum"
 
-#define FILTRO 0.08               //filtro em Hz para condicionamento dos sinais
-#define AMOSTRAGEM_DO_FILTRO 0.05 //amostragem do filtro em segundos
+//DHT
+#define DHTPIN 4
+#define DHTTYPE DHT22
 
-#define OFFSET_HIGROMETRO -20
-#define OFFSET_TERMOMETRO 0
-#define RESISTOR_SERIE 9820
-#define TENSAO_ALIMENTACAO 3.3
-#define RESOLUCAO_CONDICIONADOR 10 // resolucao do conversor em bits
+// #define FILTRO 0.08               //filtro em Hz para condicionamento dos sinais
+// #define AMOSTRAGEM_DO_FILTRO 0.05 //amostragem do filtro em segundos
 
+// #define OFFSET_HIGROMETRO 0
+// #define OFFSET_TERMOMETRO 0
+// #define RESISTOR_SERIE 9820
+// #define TENSAO_ALIMENTACAO 3.3
+// #define RESOLUCAO_CONDICIONADOR 10 // resolucao do conversor em bits
 
-TH::Temperatura temperatura1(RESOLUCAO_CONDICIONADOR, RESISTOR_SERIE,OFFSET_TERMOMETRO);                // argumentos (resolução AD, resistor serie do NTC)
-TH::Umidade umidade1(RESOLUCAO_CONDICIONADOR, TENSAO_ALIMENTACAO, OFFSET_HIGROMETRO); // argumentos (resolução AD, tensao de alimentacao, offset)
-DSP::FiltroPassaBaixa filtro_temperatura(FILTRO, AMOSTRAGEM_DO_FILTRO);               // argumentos (Hz, tempo de amostragem)
-DSP::FiltroPassaBaixa filtro_umidade(FILTRO, AMOSTRAGEM_DO_FILTRO);
+// DSP::FiltroPassaBaixa filtro_temperatura(FILTRO, AMOSTRAGEM_DO_FILTRO);               // argumentos (Hz, tempo de amostragem)
+// DSP::FiltroPassaBaixa filtro_umidade(FILTRO, AMOSTRAGEM_DO_FILTRO);
 
 WiFiClient wifiClient;
 
+// Initialize DHT sensor.
+DHT dht(DHTPIN, DHTTYPE);
 
 PubSubClient client(wifiClient);
 
@@ -48,8 +52,7 @@ unsigned long comutar;
 void setup()
 {
     Serial.begin(BAUDE_RATE);
-    config::setup();
-
+    dht.begin();
     delay(10);
     InitWiFi();
     client.setServer(thingsboardServer, 1883);
@@ -65,11 +68,11 @@ void loop()
         reconnect();
     }
 
-    if (millis() - comutar > (AMOSTRAGEM_DO_FILTRO * 1000))
-    { // Update and send only after 1 seconds
-        chaveamento();
-        comutar = millis();
-    }
+    // if (millis() - comutar > (AMOSTRAGEM_DO_FILTRO * 1000))
+    // { // Update and send only after 1 seconds
+    //     // chaveamento();
+    //     comutar = millis();
+    // }
 
 
     if (millis() - lastSend > (TEMPO_DADO_BROKER * 60000))
@@ -82,22 +85,23 @@ void loop()
     client.loop();
 }
 
-void chaveamento()
-{
-    config::ativaTemperatura();
-    const float t = filtro_temperatura.update(temperatura1.lerTemperatura(config::sinalAD()));
-    config::ativaUmidade();
-    const float h = filtro_umidade.update(umidade1.lerUmidade(config::sinalAD()));
-}
+// void chaveamento()
+// {
+//     config::ativaTemperatura();
+//     const float t = filtro_temperatura.update(temperatura1.lerTemperatura(config::sinalAD()));
+//     config::ativaUmidade();
+//     const float h = filtro_umidade.update(umidade1.lerUmidade(config::sinalAD()));
+// }
 
 void getAndSendTemperatureAndHumidityData()
 {
-    config::ativaUmidade();
-    const float h = filtro_umidade.update(umidade1.lerUmidade(config::sinalAD()));
-    
-    config::ativaTemperatura();
-    const float t = filtro_temperatura.update(temperatura1.lerTemperatura(config::sinalAD()));
 
+    float h = dht.readHumidity();
+
+    delay(20);
+
+    float t = dht.readTemperature();
+    
     // Check if any reads failed and exit early (to try again).
     if (isnan(h) || isnan(t))
     {
@@ -105,22 +109,12 @@ void getAndSendTemperatureAndHumidityData()
         return;
     }
 
-    // Serial.print("Humidity: ");
-    // Serial.print(h);
-    // Serial.print(" %\t");
-    // Serial.print("Temperature: ");
-    // Serial.print(t);
-    // Serial.print(" *C ");
+   
 
     String temperature = String(t);
     String humidity = String(h);
 
-    // // Just debug messages
-    // Serial.print("Sending temperature and humidity : [");
-    // Serial.print(temperature);
-    // Serial.print(",");
-    // Serial.print(humidity);
-    // Serial.print("] -> ");
+  
 
     // Prepare a JSON payload string
     String payload = "{";
