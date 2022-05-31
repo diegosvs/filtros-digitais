@@ -12,28 +12,17 @@
 
 #define BAUDE_RATE 9600
 
-#define TOKEN "lmmthg004"
-#define TEMPO_DADO_BROKER 0.1 // tempo em minutos para aquisição no broker da thingsboard
+#define TOKEN "lmmthg002" // senha do dispositivo cadastrado no thingsboard
+#define TEMPO_DADO_BROKER 45 // tempo em minutos para aquisição no broker da thingsboard
 
 
-#define WIFI_AP "IPT-WiFi"
-#define WIFI_PASSWORD "the@trum"
+#define WIFI_AP "IPT-IoT"
+#define WIFI_PASSWORD "r@cion@l"
 
 //DHT
 #define DHTPIN 4
 #define DHTTYPE DHT22
 
-// #define FILTRO 0.08               //filtro em Hz para condicionamento dos sinais
-// #define AMOSTRAGEM_DO_FILTRO 0.05 //amostragem do filtro em segundos
-
-// #define OFFSET_HIGROMETRO 0
-// #define OFFSET_TERMOMETRO 0
-// #define RESISTOR_SERIE 9820
-// #define TENSAO_ALIMENTACAO 3.3
-// #define RESOLUCAO_CONDICIONADOR 10 // resolucao do conversor em bits
-
-// DSP::FiltroPassaBaixa filtro_temperatura(FILTRO, AMOSTRAGEM_DO_FILTRO);               // argumentos (Hz, tempo de amostragem)
-// DSP::FiltroPassaBaixa filtro_umidade(FILTRO, AMOSTRAGEM_DO_FILTRO);
 
 WiFiClient wifiClient;
 
@@ -42,41 +31,40 @@ DHT dht(DHTPIN, DHTTYPE);
 
 PubSubClient client(wifiClient);
 
-char thingsboardServer[] = "iothmlsice.ipt.br";
+char thingsboardServer[] = "iothmlsice.ipt.br"; // endereço do thingsboard
 
 int status = WL_IDLE_STATUS;
 
 unsigned long lastSend;
-unsigned long comutar;
 
 void setup()
 {
     Serial.begin(BAUDE_RATE);
     dht.begin();
     delay(10);
-    InitWiFi();
+    InitWiFi();   
     client.setServer(thingsboardServer, 1883);
     lastSend = 0;
-    comutar = 0;
+    
+    
 }
 
 void loop()
 {
 
+/*---------------------------------------------------------------*/
+                    /*conecta ao broker */
+                    
     if (!client.connected())
     {
         reconnect();
     }
 
-    // if (millis() - comutar > (AMOSTRAGEM_DO_FILTRO * 1000))
-    // { // Update and send only after 1 seconds
-    //     // chaveamento();
-    //     comutar = millis();
-    // }
+/*---------------------------------------------------------------*/
 
-
-    if (millis() - lastSend > (TEMPO_DADO_BROKER * 60000))
-    { // Update and send only after 1 seconds
+   
+    if (millis() - lastSend > (TEMPO_DADO_BROKER * 60000)) // conta minutos para envio de payload
+    { 
         getAndSendTemperatureAndHumidityData();
         lastSend = millis();
     }
@@ -85,13 +73,6 @@ void loop()
     client.loop();
 }
 
-// void chaveamento()
-// {
-//     config::ativaTemperatura();
-//     const float t = filtro_temperatura.update(temperatura1.lerTemperatura(config::sinalAD()));
-//     config::ativaUmidade();
-//     const float h = filtro_umidade.update(umidade1.lerUmidade(config::sinalAD()));
-// }
 
 void getAndSendTemperatureAndHumidityData()
 {
@@ -109,12 +90,8 @@ void getAndSendTemperatureAndHumidityData()
         return;
     }
 
-   
-
     String temperature = String(t);
     String humidity = String(h);
-
-  
 
     // Prepare a JSON payload string
     String payload = "{";
@@ -170,7 +147,8 @@ void reconnect()
         if (client.connect("ESP8266 Device", TOKEN, NULL))
         {
             Serial.println("[DONE]");
-            //digitalWrite(LED_BUILTIN, LOW);
+            digitalWrite(LED_BUILTIN, LOW);
+            getAndSendTemperatureAndHumidityData(); // envia um payload ao broker assim que dispositivo é ligado
         }
 
         else
@@ -179,7 +157,7 @@ void reconnect()
             Serial.print(client.state());
             Serial.println(" : retrying in 5 seconds]");
             // Wait 5 seconds before retrying
-            //digitalWrite(LED_BUILTIN, LOW);
+            digitalWrite(LED_BUILTIN, LOW);
             delay(5000);
         }
     }
