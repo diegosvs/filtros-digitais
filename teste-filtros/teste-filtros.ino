@@ -15,6 +15,8 @@
 #define TOKEN "lmmthg002" // senha do dispositivo cadastrado no thingsboard
 #define TEMPO_DADO_BROKER 45 // tempo em minutos para aquisição no broker da thingsboard
 
+#define MQTT_USERNAME  "LMM-TU-002"  // nome do dispositivo cadastrado 
+#define MQTT_PASSWORD  ""  // se houver senha cadastrada no broker
 
 #define WIFI_AP "IPT-IoT"
 #define WIFI_PASSWORD "r@cion@l"
@@ -23,15 +25,19 @@
 #define DHTPIN 4
 #define DHTTYPE DHT22
 
-
 WiFiClient wifiClient;
+WiFiClient nodeClient;
 
 // Initialize DHT sensor.
 DHT dht(DHTPIN, DHTTYPE);
 
 PubSubClient client(wifiClient);
+PubSubClient mqtt_node(nodeClient);
 
 char thingsboardServer[] = "iothmlsice.ipt.br"; // endereço do thingsboard
+
+char broker_mqtt_node[] = "10.5.39.18"; //inserir endereço do broker local
+int broker_port = 1882;  // inserir a porta cadastrada no broker
 
 int status = WL_IDLE_STATUS;
 
@@ -44,9 +50,9 @@ void setup()
     delay(10);
     InitWiFi();   
     client.setServer(thingsboardServer, 1883);
-    lastSend = 0;
-    
-    
+    mqtt_node.setServer(broker_mqtt_node,broker_port);
+    mqtt_node.setCallback(callback);
+    lastSend = 0;      
 }
 
 void loop()
@@ -55,22 +61,20 @@ void loop()
 /*---------------------------------------------------------------*/
                     /*conecta ao broker */
                     
-    if (!client.connected())
+    if ((!client.connected()))
+    {
+        reconnect();
+    }
+
+     if ((!mqtt_node.connected()))
     {
         reconnect();
     }
 
 /*---------------------------------------------------------------*/
-
-   
-    if (millis() - lastSend > (TEMPO_DADO_BROKER * 60000)) // conta minutos para envio de payload
-    { 
-        getAndSendTemperatureAndHumidityData();
-        lastSend = millis();
-    }
-
-    
+      
     client.loop();
+    mqtt_node.loop();
 }
 
 
@@ -126,7 +130,7 @@ void InitWiFi()
 void reconnect()
 {
     // Loop until we're reconnected
-    while (!client.connected())
+    while ((!client.connected())||(!mqtt_node.connected()))
     {
         status = WiFi.status();
         if (status != WL_CONNECTED)
@@ -144,12 +148,16 @@ void reconnect()
 
         Serial.print("Connecting to Thingsboard node ...");
         // Attempt to connect (clientId, username, password)
-        if (client.connect("ESP8266 Device", TOKEN, NULL))
+        if ((client.connect("ESP8266 Device", TOKEN, NULL))&&(mqtt_node.connect("teste", MQTT_USERNAME, MQTT_PASSWORD)))
         {
             Serial.println("[DONE]");
             digitalWrite(LED_BUILTIN, LOW);
             getAndSendTemperatureAndHumidityData(); // envia um payload ao broker assim que dispositivo é ligado
+            mqtt_node.subscribe("LEDPLACA"); // topico de estado do led
+            mqtt_node.subscribe("datatago"); // topico que grava os dados em arquivo local do broker
+            mqtt_node.subscribe("datanode"); // topico para envio de dados para o dashboard 
         }
+        
 
         else
         {
@@ -162,3 +170,53 @@ void reconnect()
         }
     }
 }
+
+/* Funcao: checa os tópicos enviados para o esp8266 para interação com o broker */
+ void callback(String topic, byte* payload, unsigned int length) 
+  {
+
+    String messageTemp; 
+    
+    for (int i = 0; i < length; i++) 
+      {       
+        messageTemp += (char)payload[i];
+      }  
+  
+    //Serial.print(messageTemp);
+    //Serial.println();
+    //Serial.print(topic);
+    //Serial.println();
+
+  /*topico que checa se o botao de teste do dashboard do led interno foi pressionado*/
+    if(topic=="LEDPLACA") 
+        {  
+          if(messageTemp == "ligar" )
+            {
+              bool ledteste=!ledteste;
+              digitalWrite(LED_BUILTIN, ledteste);
+            }
+            
+          else if(messageTemp == "desligar")
+            {      
+              //digitalWrite(LED_BUILTIN, HIGH);
+            }
+        }  
+  
+    /*recebe o topico que aciona a funcao de envio de valores para o broker para que sejam armazenados*/
+    else if(topic=="datatago") 
+        {  
+          if(messageTemp == "send_data_tago" )
+            {
+              getAndSendTemperatureAndHumidityData();
+            }     
+        }
+  
+    /*recebe o topico que aciona a funcao de envio de valores para o dashboard*/
+    else if(topic=="datanode") 
+        {  
+          if(messageTemp == "send_data_node" )
+            {
+              //send_data_nodered();            
+            }     
+        }       
+  }
