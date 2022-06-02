@@ -12,10 +12,10 @@
 
 #define BAUDE_RATE 9600
 
-#define TOKEN "lmmthg002" // senha do dispositivo cadastrado no thingsboard
+#define TOKEN "lmmthg004" // senha do dispositivo cadastrado no thingsboard
 #define TEMPO_DADO_BROKER 45 // tempo em minutos para aquisição no broker da thingsboard
 
-#define MQTT_USERNAME  "LMM-TU-002"  // nome do dispositivo cadastrado 
+#define MQTT_USERNAME  "LMM-TU-004"  // nome do dispositivo cadastrado 
 #define MQTT_PASSWORD  ""  // se houver senha cadastrada no broker
 
 #define WIFI_AP "IPT-IoT"
@@ -37,7 +37,7 @@ PubSubClient mqtt_node(nodeClient);
 char thingsboardServer[] = "iothmlsice.ipt.br"; // endereço do thingsboard
 
 char broker_mqtt_node[] = "10.5.39.18"; //inserir endereço do broker local
-int broker_port = 1882;  // inserir a porta cadastrada no broker
+int broker_port = 1884;  // inserir a porta cadastrada no broker
 
 int status = WL_IDLE_STATUS;
 
