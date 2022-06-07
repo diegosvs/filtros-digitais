@@ -12,11 +12,16 @@
 
 #define BAUDE_RATE 9600
 
-#define TOKEN "lmmthg004" // senha do dispositivo cadastrado no thingsboard
+#define TOKEN "lmmthg002" // senha do dispositivo cadastrado no thingsboard
 #define TEMPO_DADO_BROKER 45 // tempo em minutos para aquisição no broker da thingsboard
 
-#define MQTT_USERNAME  "LMM-TU-004"  // nome do dispositivo cadastrado 
+#define MQTT_USERNAME  "LMM-TU-003"  // nome do dispositivo cadastrado 
 #define MQTT_PASSWORD  ""  // se houver senha cadastrada no broker
+
+#define TOPICO_TEMPERATURA "device/temperatura"
+#define TOPICO_UMIDADE "device/umidade"
+#define TOPICO_SUBS_NODE "datanode"
+#define TOPICO_SUBS_TB "datatago"
 
 #define WIFI_AP "IPT-IoT"
 #define WIFI_PASSWORD "r@cion@l"
@@ -37,7 +42,7 @@ PubSubClient mqtt_node(nodeClient);
 char thingsboardServer[] = "iothmlsice.ipt.br"; // endereço do thingsboard
 
 char broker_mqtt_node[] = "10.5.39.18"; //inserir endereço do broker local
-int broker_port = 1884;  // inserir a porta cadastrada no broker
+int broker_port = 1882;  // inserir a porta cadastrada no broker
 
 int status = WL_IDLE_STATUS;
 
@@ -113,6 +118,16 @@ void getAndSendTemperatureAndHumidityData()
     Serial.println(attributes);
 }
 
+/* Funcao: envia os valores para o dashboard node-red*/
+void send_data_nodered(void)
+  {
+   float temperatura_lida = dht.readTemperature();
+   float umidade_lida = dht.readHumidity();
+
+   mqtt_node.publish(TOPICO_TEMPERATURA, String(temperatura_lida).c_str(), true);
+   mqtt_node.publish(TOPICO_UMIDADE, String(umidade_lida).c_str(), true);
+  }
+
 void InitWiFi()
 {
     Serial.println("Connecting to AP ...");
@@ -154,8 +169,8 @@ void reconnect()
             digitalWrite(LED_BUILTIN, LOW);
             getAndSendTemperatureAndHumidityData(); // envia um payload ao broker assim que dispositivo é ligado
             mqtt_node.subscribe("LEDPLACA"); // topico de estado do led
-            mqtt_node.subscribe("datatago"); // topico que grava os dados em arquivo local do broker
-            mqtt_node.subscribe("datanode"); // topico para envio de dados para o dashboard 
+            mqtt_node.subscribe(TOPICO_SUBS_TB); // topico que grava os dados em arquivo local do broker
+            mqtt_node.subscribe(TOPICO_SUBS_NODE); // topico para envio de dados para o dashboard 
         }
         
 
@@ -216,7 +231,7 @@ void reconnect()
         {  
           if(messageTemp == "send_data_node" )
             {
-              //send_data_nodered();            
+              send_data_nodered();            
             }     
         }       
   }
