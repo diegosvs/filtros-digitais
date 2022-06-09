@@ -1,62 +1,76 @@
 
-#include "FiltroPassaBaixa.hpp"
-#include "Temperatura.hpp"
-#include "Umidade.hpp"
-#include "config.hpp"
+// #include "FiltroPassaBaixa.hpp"
+// #include "Temperatura.hpp"
+// #include "Umidade.hpp"
+// #include "config.hpp"
 #include <ArduinoJson.h>
 #include <ArduinoHttpClient.h>
 #include <PubSubClient.h>
 #include <DHT.h>
+#include <Adafruit_BMP280.h>
 //#include "WiFi.h"      //ESP32
 #include <ESP8266WiFi.h> //ESP8266
 
 #define BAUDE_RATE 9600
 
-#define TOKEN "lmmthg002" // senha do dispositivo cadastrado no thingsboard
-#define TEMPO_DADO_BROKER 45 // tempo em minutos para aquisição no broker da thingsboard
+#define TOKEN "lmmthg003" // senha do dispositivo cadastrado no thingsboard
+//#define TEMPO_DADO_BROKER 45 // tempo em minutos para aquisição no broker da thingsboard
 
+//credenciais ao broker no node-red
 #define MQTT_USERNAME  "LMM-TU-003"  // nome do dispositivo cadastrado 
 #define MQTT_PASSWORD  ""  // se houver senha cadastrada no broker
+#define MQTT_PORT 8883  // porta especifica para comunicacao
+#define MQTT_ENDERECO_IP "10.5.39.18" // endereco de ip onde estiver rodando o node-red
 
-#define TOPICO_TEMPERATURA "device/temperatura"
-#define TOPICO_UMIDADE "device/umidade"
+//tópicos necessários para envio de dados via mqtt
+#define TOPICO_PUB_TEMPERATURA "device/temperatura"
+#define TOPICO_PUB_UMIDADE "device/umidade"
+#define TOPICO_PUB_PRESSAO "device/pressao" 
 #define TOPICO_SUBS_NODE "datanode"
 #define TOPICO_SUBS_TB "datatago"
+#define TOPICO_SUBS_LED "LEDPLACA"
 
+//conexao à rede wifi
 #define WIFI_AP "IPT-IoT"
 #define WIFI_PASSWORD "r@cion@l"
 
 //DHT
-#define DHTPIN 4
+#define DHTPIN 0 // PIN0 - PIN2 - PIN16
 #define DHTTYPE DHT22
 
-WiFiClient wifiClient;
-WiFiClient nodeClient;
+// endereço do thingsboard
+char thingsboardServer[] = "iothmlsice.ipt.br"; 
+
+WiFiClient wifiClient; //objeto para conexao ao thingsboard
+WiFiClient nodeClient; //objeto para conexao ao node-red
 
 // Initialize DHT sensor.
 DHT dht(DHTPIN, DHTTYPE);
 
+//BMP280 ---> I2C PIN 5 - SCL / PIN4 - SDA
+Adafruit_BMP280 bmp; // sensor bmp conecta pela i2c
+
+//Objetos para conexao ao Thingsboard e Node-red
 PubSubClient client(wifiClient);
 PubSubClient mqtt_node(nodeClient);
-
-char thingsboardServer[] = "iothmlsice.ipt.br"; // endereço do thingsboard
-
-char broker_mqtt_node[] = "10.5.39.18"; //inserir endereço do broker local
-int broker_port = 1882;  // inserir a porta cadastrada no broker
 
 int status = WL_IDLE_STATUS;
 
 unsigned long lastSend;
+bool ledteste = false;
 
 void setup()
 {
     Serial.begin(BAUDE_RATE);
+    pinMode(BUILTIN_LED, OUTPUT); 
+    digitalWrite(LED_BUILTIN, HIGH); 
     dht.begin();
+    bmp.begin(0x76);
     delay(10);
     InitWiFi();   
     client.setServer(thingsboardServer, 1883);
-    mqtt_node.setServer(broker_mqtt_node,broker_port);
-    mqtt_node.setCallback(callback);
+    mqtt_node.setServer(MQTT_ENDERECO_IP , MQTT_PORT);
+    mqtt_node.setCallback(callback); // cadastro de tópicos para checagem. Ver funcao callback
     lastSend = 0;      
 }
 
@@ -64,7 +78,7 @@ void loop()
 {
 
 /*---------------------------------------------------------------*/
-                    /*conecta ao broker */
+                    /*checa e conecta ao Thingsboard e Node-red */
                     
     if ((!client.connected()))
     {
@@ -78,22 +92,23 @@ void loop()
 
 /*---------------------------------------------------------------*/
       
-    client.loop();
-    mqtt_node.loop();
+    client.loop(); // conexao do thingsboard
+    mqtt_node.loop(); // conexao ao node-red
 }
 
 
-void getAndSendTemperatureAndHumidityData()
-{
-
+void getAndSendTemperatureAndHumidityData() //função para envio de dados ao Thingsboard
+{ 
     float h = dht.readHumidity();
-
     delay(20);
 
     float t = dht.readTemperature();
+    delay(20);
+
+    float p = bmp.readPressure();
     
     // Check if any reads failed and exit early (to try again).
-    if (isnan(h) || isnan(t))
+    if (isnan(h) || isnan(t) || isnan(p))
     {
         Serial.println("Failed to read from DHT sensor!");
         return;
@@ -101,14 +116,26 @@ void getAndSendTemperatureAndHumidityData()
 
     String temperature = String(t);
     String humidity = String(h);
+    String pressure = String(p);
 
     // Prepare a JSON payload string
+    // String payload = "{";
+    // payload += "\"temperatura\":";
+    // payload += temperature;
+    // payload += ",";
+    // payload += "\"umidade\":";
+    // payload += humidity;
+    // payload += "}";
+
     String payload = "{";
     payload += "\"temperatura\":";
     payload += temperature;
     payload += ",";
     payload += "\"umidade\":";
     payload += humidity;
+    payload += ",";
+    payload += "\"pressão\":";
+    payload += pressure;
     payload += "}";
 
     // Send payload
@@ -121,11 +148,15 @@ void getAndSendTemperatureAndHumidityData()
 /* Funcao: envia os valores para o dashboard node-red*/
 void send_data_nodered(void)
   {
+    // aquisita valores dos sensores
    float temperatura_lida = dht.readTemperature();
    float umidade_lida = dht.readHumidity();
+   float pressao = bmp.readPressure();
 
-   mqtt_node.publish(TOPICO_TEMPERATURA, String(temperatura_lida).c_str(), true);
-   mqtt_node.publish(TOPICO_UMIDADE, String(umidade_lida).c_str(), true);
+// envia os valores aquisitados através dos tópicos cadastrados no node-red
+   mqtt_node.publish(TOPICO_PUB_TEMPERATURA, String(temperatura_lida).c_str(), true);
+   mqtt_node.publish(TOPICO_PUB_UMIDADE, String(umidade_lida).c_str(), true);
+   mqtt_node.publish(TOPICO_PUB_PRESSAO, String(pressao).c_str(), true);
   }
 
 void InitWiFi()
@@ -167,8 +198,8 @@ void reconnect()
         {
             Serial.println("[DONE]");
             digitalWrite(LED_BUILTIN, LOW);
-            getAndSendTemperatureAndHumidityData(); // envia um payload ao broker assim que dispositivo é ligado
-            mqtt_node.subscribe("LEDPLACA"); // topico de estado do led
+            //getAndSendTemperatureAndHumidityData(); // envia um payload ao broker assim que dispositivo é ligado
+            mqtt_node.subscribe(TOPICO_SUBS_LED); // topico de estado do led
             mqtt_node.subscribe(TOPICO_SUBS_TB); // topico que grava os dados em arquivo local do broker
             mqtt_node.subscribe(TOPICO_SUBS_NODE); // topico para envio de dados para o dashboard 
         }
@@ -203,11 +234,11 @@ void reconnect()
     //Serial.println();
 
   /*topico que checa se o botao de teste do dashboard do led interno foi pressionado*/
-    if(topic=="LEDPLACA") 
+    if(topic==TOPICO_SUBS_LED) 
         {  
           if(messageTemp == "ligar" )
             {
-              bool ledteste=!ledteste;
+              ledteste=!ledteste;
               digitalWrite(LED_BUILTIN, ledteste);
             }
             
@@ -217,8 +248,8 @@ void reconnect()
             }
         }  
   
-    /*recebe o topico que aciona a funcao de envio de valores para o broker para que sejam armazenados*/
-    else if(topic=="datatago") 
+    /*recebe o topico que aciona a funcao de envio de valores para o Thingsboard*/
+    else if(topic==TOPICO_SUBS_TB) 
         {  
           if(messageTemp == "send_data_tago" )
             {
@@ -226,8 +257,8 @@ void reconnect()
             }     
         }
   
-    /*recebe o topico que aciona a funcao de envio de valores para o dashboard*/
-    else if(topic=="datanode") 
+    /*recebe o topico que aciona a funcao de envio de valores para o dashboard no node-red*/
+    else if(topic==TOPICO_SUBS_NODE) 
         {  
           if(messageTemp == "send_data_node" )
             {
