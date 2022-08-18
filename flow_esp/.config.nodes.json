@@ -1,10 +1,21 @@
 {
     "node-red": {
         "name": "node-red",
-        "version": "2.0.5",
+        "version": "3.0.1",
         "local": false,
         "user": false,
         "nodes": {
+            "junction": {
+                "name": "junction",
+                "types": [
+                    "junction"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "C:\\Users\\diego\\AppData\\Roaming\\npm\\node_modules\\node-red\\node_modules\\@node-red\\nodes\\core\\common\\05-junction.js"
+            },
             "inject": {
                 "name": "inject",
                 "types": [
@@ -64,7 +75,8 @@
                 "name": "link",
                 "types": [
                     "link in",
-                    "link out"
+                    "link out",
+                    "link call"
                 ],
                 "enabled": true,
                 "local": false,
@@ -419,7 +431,7 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-contrib-mqtt-broker",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-contrib-mqtt-broker\\mosca.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-contrib-mqtt-broker\\mosca.js"
             }
         }
     },
@@ -438,7 +450,7 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_base.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_base.js"
             },
             "ui_button": {
                 "name": "ui_button",
@@ -449,7 +461,7 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_button.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_button.js"
             },
             "ui_dropdown": {
                 "name": "ui_dropdown",
@@ -460,7 +472,7 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_dropdown.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_dropdown.js"
             },
             "ui_switch": {
                 "name": "ui_switch",
@@ -471,7 +483,7 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_switch.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_switch.js"
             },
             "ui_slider": {
                 "name": "ui_slider",
@@ -482,7 +494,7 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_slider.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_slider.js"
             },
             "ui_numeric": {
                 "name": "ui_numeric",
@@ -493,7 +505,7 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_numeric.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_numeric.js"
             },
             "ui_text_input": {
                 "name": "ui_text_input",
@@ -504,7 +516,7 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_text_input.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_text_input.js"
             },
             "ui_date_picker": {
                 "name": "ui_date_picker",
@@ -515,7 +527,7 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_date_picker.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_date_picker.js"
             },
             "ui_colour_picker": {
                 "name": "ui_colour_picker",
@@ -526,7 +538,7 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_colour_picker.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_colour_picker.js"
             },
             "ui_form": {
                 "name": "ui_form",
@@ -537,7 +549,7 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_form.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_form.js"
             },
             "ui_text": {
                 "name": "ui_text",
@@ -548,7 +560,7 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_text.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_text.js"
             },
             "ui_gauge": {
                 "name": "ui_gauge",
@@ -559,7 +571,7 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_gauge.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_gauge.js"
             },
             "ui_chart": {
                 "name": "ui_chart",
@@ -570,7 +582,7 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_chart.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_chart.js"
             },
             "ui_audio": {
                 "name": "ui_audio",
@@ -581,7 +593,7 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_audio.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_audio.js"
             },
             "ui_toast": {
                 "name": "ui_toast",
@@ -592,7 +604,7 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_toast.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_toast.js"
             },
             "ui_ui_control": {
                 "name": "ui_ui_control",
@@ -603,7 +615,7 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_ui_control.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_ui_control.js"
             },
             "ui_template": {
                 "name": "ui_template",
@@ -614,7 +626,7 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_template.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_template.js"
             },
             "ui_link": {
                 "name": "ui_link",
@@ -625,7 +637,7 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_link.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_link.js"
             },
             "ui_tab": {
                 "name": "ui_tab",
@@ -636,7 +648,7 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_tab.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_tab.js"
             },
             "ui_group": {
                 "name": "ui_group",
@@ -647,7 +659,7 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_group.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_group.js"
             },
             "ui_spacer": {
                 "name": "ui_spacer",
@@ -658,7 +670,7 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_spacer.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-dashboard\\nodes\\ui_spacer.js"
             }
         }
     },
@@ -677,7 +689,7 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-node-random",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-node-random\\random.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-node-random\\random.js"
             }
         }
     },
@@ -696,7 +708,7 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-node-ui-table",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-node-ui-table\\node.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-node-ui-table\\node.js"
             }
         }
     },
@@ -715,7 +727,7 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-social-aggregator",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-social-aggregator\\social-aggregator.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-social-aggregator\\social-aggregator.js"
             }
         }
     },
@@ -734,7 +746,7 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-contrib-ui-led",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-contrib-ui-led\\led.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-contrib-ui-led\\led.js"
             }
         }
     },
@@ -753,7 +765,7 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-contrib-simple-message-queue",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-contrib-simple-message-queue\\simple-message-queue.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-contrib-simple-message-queue\\simple-message-queue.js"
             }
         }
     },
@@ -772,7 +784,7 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-contrib-aedes",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-contrib-aedes\\aedes.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-contrib-aedes\\aedes.js"
             }
         }
     },
@@ -791,7 +803,7 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-contrib-browser-utils",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-contrib-browser-utils\\fileinject\\fileinject.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-contrib-browser-utils\\fileinject\\fileinject.js"
             },
             "microphone": {
                 "name": "microphone",
@@ -802,7 +814,7 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-contrib-browser-utils",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-contrib-browser-utils\\microphone\\microphone.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-contrib-browser-utils\\microphone\\microphone.js"
             },
             "camera": {
                 "name": "camera",
@@ -813,7 +825,7 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-contrib-browser-utils",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-contrib-browser-utils\\camera\\camera.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-contrib-browser-utils\\camera\\camera.js"
             }
         }
     },
@@ -832,7 +844,7 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-contrib-play-audio",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-contrib-play-audio\\play-audio.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-contrib-play-audio\\play-audio.js"
             }
         }
     },
@@ -852,7 +864,31 @@
                 "local": true,
                 "user": false,
                 "module": "node-red-node-email",
-                "file": "C:\\Users\\diego\\Desktop\\filtros-digitais\\flow_esp\\node_modules\\node-red-node-email\\61-email.js"
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-node-email\\61-email.js"
+            }
+        }
+    },
+    "node-red-contrib-telegrambot": {
+        "name": "node-red-contrib-telegrambot",
+        "version": "12.0.0",
+        "local": true,
+        "user": true,
+        "nodes": {
+            "telegrambot": {
+                "name": "telegrambot",
+                "types": [
+                    "telegram bot",
+                    "telegram receiver",
+                    "telegram command",
+                    "telegram event",
+                    "telegram sender",
+                    "telegram reply"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-telegrambot",
+                "file": "I:\\LMM\\Area_de_Forca\\Manutencao_e_Melhorias\\monitor-lmm\\filtros-digitais\\flow_esp\\node_modules\\node-red-contrib-telegrambot\\telegrambot\\99-telegrambot.js"
             }
         }
     }

@@ -10,16 +10,22 @@
 #include <Adafruit_BMP280.h>
 //#include "WiFi.h"      //ESP32
 #include <ESP8266WiFi.h> //ESP8266
+#include "ThingsBoard.h"
 
 #define BAUDE_RATE 9600
 
-#define TOKEN "lmmthg003" // senha do dispositivo cadastrado no thingsboard
+// endereço do thingsboard
+//char thingsboardServer[] = "iothmlsice.ipt.br:8080"; 
+#define thingsboardServer  "10.5.39.18"
+
+#define TOKEN "lmmthg004" // senha do dispositivo cadastrado no thingsboard
 //#define TEMPO_DADO_BROKER 45 // tempo em minutos para aquisição no broker da thingsboard
 
 //credenciais ao broker no node-red
-#define MQTT_USERNAME  "LMM-TU-003"  // nome do dispositivo cadastrado 
+#define MQTT_USERNAME  "LMM-TU-004"  // nome do dispositivo cadastrado 
 #define MQTT_PASSWORD  ""  // se houver senha cadastrada no broker
-#define MQTT_PORT 8883  // porta especifica para comunicacao
+#define MQTT_PORT 1884  // porta especifica para comunicacao
+//#define MQTT_ENDERECO_IP "10.56.56.31" // endereco de ip onde estiver rodando o node-red
 #define MQTT_ENDERECO_IP "10.5.39.18" // endereco de ip onde estiver rodando o node-red
 
 //tópicos necessários para envio de dados via mqtt
@@ -38,8 +44,6 @@
 #define DHTPIN 0 // PIN0 - PIN2 - PIN16
 #define DHTTYPE DHT22
 
-// endereço do thingsboard
-char thingsboardServer[] = "iothmlsice.ipt.br"; 
 
 WiFiClient wifiClient; //objeto para conexao ao thingsboard
 WiFiClient nodeClient; //objeto para conexao ao node-red
@@ -48,10 +52,10 @@ WiFiClient nodeClient; //objeto para conexao ao node-red
 DHT dht(DHTPIN, DHTTYPE);
 
 //BMP280 ---> I2C PIN 5 - SCL / PIN4 - SDA
-Adafruit_BMP280 bmp; // sensor bmp conecta pela i2c
+// Adafruit_BMP280 bmp; // sensor bmp conecta pela i2c
 
 //Objetos para conexao ao Thingsboard e Node-red
-PubSubClient client(wifiClient);
+ThingsBoard client(wifiClient);
 PubSubClient mqtt_node(nodeClient);
 
 int status = WL_IDLE_STATUS;
@@ -65,10 +69,10 @@ void setup()
     pinMode(BUILTIN_LED, OUTPUT); 
     digitalWrite(LED_BUILTIN, HIGH); 
     dht.begin();
-    bmp.begin(0x76);
+    //bmp.begin(0x76);
     delay(10);
     InitWiFi();   
-    client.setServer(thingsboardServer, 1883);
+    //client.setServer(thingsboardServer, 1883);
     mqtt_node.setServer(MQTT_ENDERECO_IP , MQTT_PORT);
     mqtt_node.setCallback(callback); // cadastro de tópicos para checagem. Ver funcao callback
     lastSend = 0;      
@@ -105,44 +109,18 @@ void getAndSendTemperatureAndHumidityData() //função para envio de dados ao Th
     float t = dht.readTemperature();
     delay(20);
 
-    float p = bmp.readPressure();
+    // float p = bmp.readPressure();
     
     // Check if any reads failed and exit early (to try again).
-    if (isnan(h) || isnan(t) || isnan(p))
+    if (isnan(h) || isnan(t) )
     {
         Serial.println("Failed to read from DHT sensor!");
         return;
     }
-
-    String temperature = String(t);
-    String humidity = String(h);
-    String pressure = String(p);
-
-    // Prepare a JSON payload string
-    // String payload = "{";
-    // payload += "\"temperatura\":";
-    // payload += temperature;
-    // payload += ",";
-    // payload += "\"umidade\":";
-    // payload += humidity;
-    // payload += "}";
-
-    String payload = "{";
-    payload += "\"temperatura\":";
-    payload += temperature;
-    payload += ",";
-    payload += "\"umidade\":";
-    payload += humidity;
-    payload += ",";
-    payload += "\"pressão\":";
-    payload += pressure;
-    payload += "}";
-
-    // Send payload
-    char attributes[100];
-    payload.toCharArray(attributes, 100);
-    client.publish("v1/devices/me/telemetry", attributes);
-    Serial.println(attributes);
+    
+    client.sendTelemetryFloat("temperatura", t);
+    client.sendTelemetryFloat("umidade", h);    
+    //client.sendTelemetryFloat("pressao", p);
 }
 
 /* Funcao: envia os valores para o dashboard node-red*/
@@ -151,12 +129,12 @@ void send_data_nodered(void)
     // aquisita valores dos sensores
    float temperatura_lida = dht.readTemperature();
    float umidade_lida = dht.readHumidity();
-   float pressao = bmp.readPressure();
+  //  float pressao = bmp.readPressure();
 
 // envia os valores aquisitados através dos tópicos cadastrados no node-red
    mqtt_node.publish(TOPICO_PUB_TEMPERATURA, String(temperatura_lida).c_str(), true);
    mqtt_node.publish(TOPICO_PUB_UMIDADE, String(umidade_lida).c_str(), true);
-   mqtt_node.publish(TOPICO_PUB_PRESSAO, String(pressao).c_str(), true);
+  //  mqtt_node.publish(TOPICO_PUB_PRESSAO, String(pressao).c_str(), true);
   }
 
 void InitWiFi()
@@ -194,21 +172,20 @@ void reconnect()
 
         Serial.print("Connecting to Thingsboard node ...");
         // Attempt to connect (clientId, username, password)
-        if ((client.connect("ESP8266 Device", TOKEN, NULL))&&(mqtt_node.connect("teste", MQTT_USERNAME, MQTT_PASSWORD)))
+        if ((client.connect(thingsboardServer, TOKEN))&&(mqtt_node.connect("teste", MQTT_USERNAME, MQTT_PASSWORD)))
         {
             Serial.println("[DONE]");
-            digitalWrite(LED_BUILTIN, LOW);
+            digitalWrite(LED_BUILTIN, HIGH);
             //getAndSendTemperatureAndHumidityData(); // envia um payload ao broker assim que dispositivo é ligado
             mqtt_node.subscribe(TOPICO_SUBS_LED); // topico de estado do led
             mqtt_node.subscribe(TOPICO_SUBS_TB); // topico que grava os dados em arquivo local do broker
             mqtt_node.subscribe(TOPICO_SUBS_NODE); // topico para envio de dados para o dashboard 
-        }
-        
+        }        
 
         else
         {
             Serial.print("[FAILED] [ rc = ");
-            Serial.print(client.state());
+            //Serial.print(client.state());
             Serial.println(" : retrying in 5 seconds]");
             // Wait 5 seconds before retrying
             digitalWrite(LED_BUILTIN, LOW);
@@ -228,10 +205,6 @@ void reconnect()
         messageTemp += (char)payload[i];
       }  
   
-    //Serial.print(messageTemp);
-    //Serial.println();
-    //Serial.print(topic);
-    //Serial.println();
 
   /*topico que checa se o botao de teste do dashboard do led interno foi pressionado*/
     if(topic==TOPICO_SUBS_LED) 
