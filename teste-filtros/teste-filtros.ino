@@ -10,17 +10,19 @@
 #include <Adafruit_BMP280.h>
 //#include "WiFi.h"      //ESP32
 #include <ESP8266WiFi.h> //ESP8266
+#include <OneWire.h>  
+#include <DallasTemperature.h>
 
 #define BAUDE_RATE 9600
 
-#define TOKEN "lmmthg004" // senha do dispositivo cadastrado no thingsboard
+#define TOKEN "_teste_" // senha do dispositivo cadastrado no thingsboard
 //#define TEMPO_DADO_BROKER 45 // tempo em minutos para aquisição no broker da thingsboard
 
 //credenciais ao broker no node-red
-#define MQTT_USERNAME  "LMM-TU-004"  // nome do dispositivo cadastrado 
+#define MQTT_USERNAME  ""  // nome do dispositivo cadastrado 
 #define MQTT_PASSWORD  ""  // se houver senha cadastrada no broker
-#define MQTT_PORT 1884  // porta especifica para comunicacao
-#define MQTT_ENDERECO_IP "10.56.56.31" // endereco de ip onde estiver rodando o node-red
+#define MQTT_PORT 1888  // porta especifica para comunicacao
+#define MQTT_ENDERECO_IP "10.5.39.18" // endereco de ip onde estiver rodando o node-red
 
 //tópicos necessários para envio de dados via mqtt
 #define TOPICO_PUB_TEMPERATURA "device/temperatura"
@@ -34,18 +36,23 @@
 #define WIFI_AP "IPT-IoT"
 #define WIFI_PASSWORD "r@cion@l"
 
-//DHT
-#define DHTPIN 0 // PIN0 - PIN2 - PIN16
-#define DHTTYPE DHT22
+
+// Initialize DHT sensor.
+// DHT dht(DHTPIN, DHTTYPE);
+// #define DHTPIN 0 // PIN0 - PIN2 - PIN16
+// #define DHTTYPE DHT22
 
 // endereço do thingsboard
-char thingsboardServer[] = "iothmlsice.ipt.br"; 
+char thingsboardServer[] = "10.5.39.18"; 
 
 WiFiClient wifiClient; //objeto para conexao ao thingsboard
 WiFiClient nodeClient; //objeto para conexao ao node-red
 
-// Initialize DHT sensor.
-DHT dht(DHTPIN, DHTTYPE);
+// configuração do sensor DS18B20
+OneWire pino(4); //D2
+DallasTemperature barramento(&pino);
+DeviceAddress sensor;
+
 
 //BMP280 ---> I2C PIN 5 - SCL / PIN4 - SDA
 // Adafruit_BMP280 bmp; // sensor bmp conecta pela i2c
@@ -63,8 +70,10 @@ void setup()
 {
     Serial.begin(BAUDE_RATE);
     pinMode(BUILTIN_LED, OUTPUT); 
-    digitalWrite(LED_BUILTIN, HIGH); 
-    dht.begin();
+    digitalWrite(LED_BUILTIN, 0); 
+    barramento.begin();
+    barramento.getAddress(sensor, 0);
+    // dht.begin();
     //bmp.begin(0x76);
     delay(10);
     InitWiFi();   
@@ -76,6 +85,9 @@ void setup()
 
 void loop()
 {
+
+  // getAndSendTemperatureAndHumidityData();
+  // delay(1000);
 
 /*---------------------------------------------------------------*/
                     /*checa e conecta ao Thingsboard e Node-red */
@@ -93,50 +105,33 @@ void loop()
 /*---------------------------------------------------------------*/
       
     client.loop(); // conexao do thingsboard
-    mqtt_node.loop(); // conexao ao node-red
+     mqtt_node.loop(); // conexao ao node-red
 }
 
 
 void getAndSendTemperatureAndHumidityData() //função para envio de dados ao Thingsboard
 { 
-    float h = dht.readHumidity();
-    delay(20);
-
-    float t = dht.readTemperature();
-    delay(20);
-
-    // float p = bmp.readPressure();
     
+    barramento.requestTemperatures();
+    float tempC = barramento.getTempC(sensor);
+    
+        
     // Check if any reads failed and exit early (to try again).
-    if (isnan(h) || isnan(t) )
+    if (isnan(tempC) )
     {
         Serial.println("Failed to read from DHT sensor!");
         return;
     }
 
-    String temperature = String(t);
-    String humidity = String(h);
-    // String pressure = String(p);
+       String t = String(tempC);
+  
 
     //Prepare a JSON payload string
     String payload = "{";
     payload += "\"temperatura\":";
-    payload += temperature;
-    payload += ",";
-    payload += "\"umidade\":";
-    payload += humidity;
-    payload += "}";
-
-    // String payload = "{";
-    // payload += "\"temperatura\":";
-    // payload += temperature;
-    // payload += ",";
-    // payload += "\"umidade\":";
-    // payload += humidity;
-    // payload += ",";
-    // payload += "\"pressão\":";
-    // payload += pressure;
-    // payload += "}";
+    payload += t;
+    
+    payload += "}";    
 
     // Send payload
     char attributes[100];
@@ -148,15 +143,12 @@ void getAndSendTemperatureAndHumidityData() //função para envio de dados ao Th
 /* Funcao: envia os valores para o dashboard node-red*/
 void send_data_nodered(void)
   {
-    // aquisita valores dos sensores
-   float temperatura_lida = dht.readTemperature();
-   float umidade_lida = dht.readHumidity();
-  //  float pressao = bmp.readPressure();
+    barramento.requestTemperatures();
+    float tempC = barramento.getTempC(sensor);
 
 // envia os valores aquisitados através dos tópicos cadastrados no node-red
-   mqtt_node.publish(TOPICO_PUB_TEMPERATURA, String(temperatura_lida).c_str(), true);
-   mqtt_node.publish(TOPICO_PUB_UMIDADE, String(umidade_lida).c_str(), true);
-  //  mqtt_node.publish(TOPICO_PUB_PRESSAO, String(pressao).c_str(), true);
+   mqtt_node.publish(TOPICO_PUB_TEMPERATURA, String(tempC).c_str(), true);
+  
   }
 
 void InitWiFi()
@@ -197,7 +189,7 @@ void reconnect()
         if ((client.connect("ESP8266 Device", TOKEN, NULL))&&(mqtt_node.connect("teste", MQTT_USERNAME, MQTT_PASSWORD)))
         {
             Serial.println("[DONE]");
-            digitalWrite(LED_BUILTIN, LOW);
+            digitalWrite(LED_BUILTIN, 1);
             //getAndSendTemperatureAndHumidityData(); // envia um payload ao broker assim que dispositivo é ligado
             mqtt_node.subscribe(TOPICO_SUBS_LED); // topico de estado do led
             mqtt_node.subscribe(TOPICO_SUBS_TB); // topico que grava os dados em arquivo local do broker

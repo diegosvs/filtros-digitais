@@ -446,7 +446,7 @@
                 "types": [
                     "ui_base"
                 ],
-                "enabled": true,
+                "enabled": false,
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
@@ -457,7 +457,7 @@
                 "types": [
                     "ui_button"
                 ],
-                "enabled": true,
+                "enabled": false,
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
@@ -468,7 +468,7 @@
                 "types": [
                     "ui_dropdown"
                 ],
-                "enabled": true,
+                "enabled": false,
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
@@ -479,7 +479,7 @@
                 "types": [
                     "ui_switch"
                 ],
-                "enabled": true,
+                "enabled": false,
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
@@ -490,7 +490,7 @@
                 "types": [
                     "ui_slider"
                 ],
-                "enabled": true,
+                "enabled": false,
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
@@ -501,7 +501,7 @@
                 "types": [
                     "ui_numeric"
                 ],
-                "enabled": true,
+                "enabled": false,
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
@@ -512,7 +512,7 @@
                 "types": [
                     "ui_text_input"
                 ],
-                "enabled": true,
+                "enabled": false,
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
@@ -523,7 +523,7 @@
                 "types": [
                     "ui_date_picker"
                 ],
-                "enabled": true,
+                "enabled": false,
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
@@ -534,7 +534,7 @@
                 "types": [
                     "ui_colour_picker"
                 ],
-                "enabled": true,
+                "enabled": false,
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
@@ -545,7 +545,7 @@
                 "types": [
                     "ui_form"
                 ],
-                "enabled": true,
+                "enabled": false,
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
@@ -556,7 +556,7 @@
                 "types": [
                     "ui_text"
                 ],
-                "enabled": true,
+                "enabled": false,
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
@@ -567,7 +567,7 @@
                 "types": [
                     "ui_gauge"
                 ],
-                "enabled": true,
+                "enabled": false,
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
@@ -578,7 +578,7 @@
                 "types": [
                     "ui_chart"
                 ],
-                "enabled": true,
+                "enabled": false,
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
@@ -589,7 +589,7 @@
                 "types": [
                     "ui_audio"
                 ],
-                "enabled": true,
+                "enabled": false,
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
@@ -600,7 +600,7 @@
                 "types": [
                     "ui_toast"
                 ],
-                "enabled": true,
+                "enabled": false,
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
@@ -611,7 +611,7 @@
                 "types": [
                     "ui_ui_control"
                 ],
-                "enabled": true,
+                "enabled": false,
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
@@ -622,7 +622,7 @@
                 "types": [
                     "ui_template"
                 ],
-                "enabled": true,
+                "enabled": false,
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
@@ -633,7 +633,7 @@
                 "types": [
                     "ui_link"
                 ],
-                "enabled": true,
+                "enabled": false,
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
@@ -644,7 +644,7 @@
                 "types": [
                     "ui_tab"
                 ],
-                "enabled": true,
+                "enabled": false,
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
@@ -655,7 +655,7 @@
                 "types": [
                     "ui_group"
                 ],
-                "enabled": true,
+                "enabled": false,
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
@@ -666,7 +666,7 @@
                 "types": [
                     "ui_spacer"
                 ],
-                "enabled": true,
+                "enabled": false,
                 "local": true,
                 "user": false,
                 "module": "node-red-dashboard",
@@ -742,7 +742,7 @@
                 "types": [
                     "ui_led"
                 ],
-                "enabled": true,
+                "enabled": false,
                 "local": true,
                 "user": false,
                 "module": "node-red-contrib-ui-led",
@@ -840,7 +840,7 @@
                 "types": [
                     "play audio"
                 ],
-                "enabled": true,
+                "enabled": false,
                 "local": true,
                 "user": false,
                 "module": "node-red-contrib-play-audio",
@@ -860,7 +860,7 @@
                     "e-mail",
                     "e-mail in"
                 ],
-                "enabled": true,
+                "enabled": false,
                 "local": true,
                 "user": false,
                 "module": "node-red-node-email",
