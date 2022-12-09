@@ -2,7 +2,11 @@
 // #include "FiltroPassaBaixa.hpp"
 // #include "Temperatura.hpp"
 // #include "Umidade.hpp"
-// #include "config.hpp"
+
+#include <ESP8266WebServer.h>
+#include <ESP8266mDNS.h>
+#include <ESP8266HTTPUpdateServer.h>
+//#include "config.hpp"
 #include <ArduinoJson.h>
 #include <ArduinoHttpClient.h>
 #include <PubSubClient.h>
@@ -13,13 +17,13 @@
 
 #define BAUDE_RATE 9600
 
-#define TOKEN "lmmthg004" // senha do dispositivo cadastrado no thingsboard
+#define TOKEN "lmmthg002" // senha do dispositivo cadastrado no thingsboard
 //#define TEMPO_DADO_BROKER 45 // tempo em minutos para aquisição no broker da thingsboard
 
 //credenciais ao broker no node-red
 #define MQTT_USERNAME  ""  // nome do dispositivo cadastrado 
 #define MQTT_PASSWORD  ""  // se houver senha cadastrada no broker
-#define MQTT_PORT 1884  // porta especifica para comunicacao
+#define MQTT_PORT 1882  // porta especifica para comunicacao
 #define MQTT_ENDERECO_IP "10.5.39.18" // endereco de ip onde estiver rodando o node-red
 
 //tópicos necessários para envio de dados via mqtt
@@ -31,6 +35,7 @@
 #define TOPICO_SUBS_LED "LEDPLACA"
 
 //conexao à rede wifi
+const char* host = "thg002";
 #define WIFI_AP "IPT-IoT"
 #define WIFI_PASSWORD "r@cion@l"
 
@@ -43,6 +48,13 @@ char thingsboardServer[] = "10.5.39.18";
 
 WiFiClient wifiClient; //objeto para conexao ao thingsboard
 WiFiClient nodeClient; //objeto para conexao ao node-red
+
+/*
+  To upload through terminal you can use: curl -F "image=@firmware.bin" esp8266-webupdate.local/update
+*/
+ESP8266WebServer httpServer(80);
+ESP8266HTTPUpdateServer httpUpdater;
+
 
 // Initialize DHT sensor.
 DHT dht(DHTPIN, DHTTYPE);
@@ -68,10 +80,19 @@ void setup()
     //bmp.begin(0x76);
     delay(10);
     InitWiFi();   
+   
     client.setServer(thingsboardServer, 1883);
     mqtt_node.setServer(MQTT_ENDERECO_IP , MQTT_PORT);
     mqtt_node.setCallback(callback); // cadastro de tópicos para checagem. Ver funcao callback
-    lastSend = 0;      
+    lastSend = 0;  
+
+    MDNS.begin(host);
+
+  httpUpdater.setup(&httpServer);
+  httpServer.begin();
+
+  MDNS.addService("http", "tcp", 80);
+  Serial.printf("HTTP Update Server ready! Open http://%s.local/update in your browser\n", host);    
 }
 
 void loop()
@@ -94,6 +115,9 @@ void loop()
       
     client.loop(); // conexao do thingsboard
     mqtt_node.loop(); // conexao ao node-red
+
+    httpServer.handleClient();
+    MDNS.update();
 }
 
 
