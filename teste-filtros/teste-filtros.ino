@@ -1,24 +1,17 @@
 
-// #include "FiltroPassaBaixa.hpp"
-// #include "Temperatura.hpp"
-// #include "Umidade.hpp"
-
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include <ESP8266HTTPUpdateServer.h>
-//#include "config.hpp"
 #include <ArduinoJson.h>
 #include <ArduinoHttpClient.h>
 #include <PubSubClient.h>
 #include <DHT.h>
 #include <Adafruit_BMP280.h>
-//#include "WiFi.h"      //ESP32
-#include <ESP8266WiFi.h> //ESP8266
+#include <ESP8266WiFi.h>
 
 #define BAUDE_RATE 9600
 
 #define TOKEN "lmmthg002" // senha do dispositivo cadastrado no thingsboard
-//#define TEMPO_DADO_BROKER 45 // tempo em minutos para aquisição no broker da thingsboard
 
 //credenciais ao broker no node-red
 #define MQTT_USERNAME  ""  // nome do dispositivo cadastrado 
@@ -35,31 +28,33 @@
 #define TOPICO_SUBS_LED "LEDPLACA"
 
 //conexao à rede wifi
-const char* host = "thg002";
 #define WIFI_AP "IPT-IoT"
 #define WIFI_PASSWORD "r@cion@l"
-
-//DHT
-#define DHTPIN 0 // PIN0 - PIN2 - PIN16
-#define DHTTYPE DHT22
 
 // endereço do thingsboard
 char thingsboardServer[] = "10.5.39.18"; 
 
+// nome do host para acesso e atualizacao via OTA. http://<HOST>.local/update
+const char* host = "thg002"; 
+// const char* update_path = "/firmware";
+// const char* update_username = "admin";
+// const char* update_password = "admin";
+
+//pinos e modelo DHT
+#define DHTPIN 0 // PIN0 - PIN2 - PIN16
+#define DHTTYPE DHT22
+
 WiFiClient wifiClient; //objeto para conexao ao thingsboard
 WiFiClient nodeClient; //objeto para conexao ao node-red
 
-/*
-  To upload through terminal you can use: curl -F "image=@firmware.bin" esp8266-webupdate.local/update
-*/
+//objetos para pagina de acesso OTA
 ESP8266WebServer httpServer(80);
 ESP8266HTTPUpdateServer httpUpdater;
 
-
-// Initialize DHT sensor.
+// objeto para iniciar DHT sensor.
 DHT dht(DHTPIN, DHTTYPE);
 
-//BMP280 ---> I2C PIN 5 - SCL / PIN4 - SDA
+//objeto para iniciar BMP280 ---> I2C PIN 5 - SCL / PIN4 - SDA
 // Adafruit_BMP280 bmp; // sensor bmp conecta pela i2c
 
 //Objetos para conexao ao Thingsboard e Node-red
@@ -67,7 +62,6 @@ PubSubClient client(wifiClient);
 PubSubClient mqtt_node(nodeClient);
 
 int status = WL_IDLE_STATUS;
-
 unsigned long lastSend;
 bool ledteste = false;
 
@@ -75,47 +69,39 @@ void setup()
 {
     Serial.begin(BAUDE_RATE);
     pinMode(BUILTIN_LED, OUTPUT); 
-    digitalWrite(LED_BUILTIN, HIGH); 
+    digitalWrite(LED_BUILTIN, 0); 
     dht.begin();
-    //bmp.begin(0x76);
+    //bmp.begin(0x76); // caso de uso com sensor de pressão
     delay(10);
     InitWiFi();   
-   
     client.setServer(thingsboardServer, 1883);
     mqtt_node.setServer(MQTT_ENDERECO_IP , MQTT_PORT);
     mqtt_node.setCallback(callback); // cadastro de tópicos para checagem. Ver funcao callback
     lastSend = 0;  
 
     MDNS.begin(host);
-
-  httpUpdater.setup(&httpServer);
-  httpServer.begin();
-
-  MDNS.addService("http", "tcp", 80);
-  Serial.printf("HTTP Update Server ready! Open http://%s.local/update in your browser\n", host);    
+    httpUpdater.setup(&httpServer);
+    //httpUpdater.setup(&httpServer, update_path, update_username, update_password);
+    httpServer.begin();
+    MDNS.addService("http", "tcp", 80);
+    Serial.printf("HTTP Update Server ready! Open http://%s.local/update in your browser\n", host);    
 }
 
 void loop()
 {
-
 /*---------------------------------------------------------------*/
                     /*checa e conecta ao Thingsboard e Node-red */
                     
-    if ((!client.connected()))
-    {
-        reconnect();
-    }
+    if ((!client.connected())){reconnect();}
 
-     if ((!mqtt_node.connected()))
-    {
-        reconnect();
-    }
+    if ((!mqtt_node.connected())){reconnect();}
 
 /*---------------------------------------------------------------*/
       
     client.loop(); // conexao do thingsboard
     mqtt_node.loop(); // conexao ao node-red
 
+    // configura página webserver para atualização OTA
     httpServer.handleClient();
     MDNS.update();
 }
@@ -165,7 +151,7 @@ void getAndSendTemperatureAndHumidityData() //função para envio de dados ao Th
     // Send payload
     char attributes[100];
     payload.toCharArray(attributes, 100);
-    client.publish("v1/devices/me/telemetry", attributes);
+    client.publish("v1/devices/me/telemetry", attributes); // envia payload para o thingsboard
     Serial.println(attributes);
 }
 
@@ -177,7 +163,7 @@ void send_data_nodered(void)
    float umidade_lida = dht.readHumidity();
   //  float pressao = bmp.readPressure();
 
-// envia os valores aquisitados através dos tópicos cadastrados no node-red
+  // envia os valores aquisitados através dos tópicos cadastrados no node-red
    mqtt_node.publish(TOPICO_PUB_TEMPERATURA, String(temperatura_lida).c_str(), true);
    mqtt_node.publish(TOPICO_PUB_UMIDADE, String(umidade_lida).c_str(), true);
   //  mqtt_node.publish(TOPICO_PUB_PRESSAO, String(pressao).c_str(), true);
@@ -235,7 +221,7 @@ void reconnect()
             Serial.print(client.state());
             Serial.println(" : retrying in 5 seconds]");
             // Wait 5 seconds before retrying
-            digitalWrite(LED_BUILTIN, LOW);
+            digitalWrite(LED_BUILTIN, 0);
             delay(5000);
         }
     }

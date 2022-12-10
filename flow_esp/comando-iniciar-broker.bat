@@ -1,6 +1,6 @@
 @echo off
 
-node-red --userDir C:\Users\diego\Desktop\filtros-digitais\flow_esp\ --port 1880 --title monitor local_flows.json
+node-red --userDir A:\curso\filtros-digitais\flow_esp\ --port 1880 --title monitor local_flows.json
 
 exit
 
