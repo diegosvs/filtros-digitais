@@ -1,14 +1,11 @@
-
-// #include "FiltroPassaBaixa.hpp"
-// #include "Temperatura.hpp"
-// #include "Umidade.hpp"
-// #include "config.hpp"
+#include <ESP8266WebServer.h>
+#include <ESP8266mDNS.h>
+#include <ESP8266HTTPUpdateServer.h>
 #include <ArduinoJson.h>
 #include <ArduinoHttpClient.h>
 #include <PubSubClient.h>
 #include <DHT.h>
 #include <Adafruit_BMP280.h>
-//#include "WiFi.h"      //ESP32
 #include <ESP8266WiFi.h> //ESP8266
 #include <OneWire.h>  
 #include <DallasTemperature.h>
@@ -36,14 +33,13 @@
 #define WIFI_AP "IPT-IoT"
 #define WIFI_PASSWORD "r@cion@l"
 
-
-// Initialize DHT sensor.
-// DHT dht(DHTPIN, DHTTYPE);
-// #define DHTPIN 0 // PIN0 - PIN2 - PIN16
-// #define DHTTYPE DHT22
-
 // endereço do thingsboard
 char thingsboardServer[] = "10.5.39.18"; 
+
+// const char* host = "esp8266-webupdate";
+// const char* update_path = "/firmware";
+// const char* update_username = "admin";
+// const char* update_password = "admin";
 
 WiFiClient wifiClient; //objeto para conexao ao thingsboard
 WiFiClient nodeClient; //objeto para conexao ao node-red
@@ -53,6 +49,10 @@ OneWire pino(4); //D2
 DallasTemperature barramento(&pino);
 DeviceAddress sensor;
 
+// Initialize DHT sensor.
+// DHT dht(DHTPIN, DHTTYPE);
+// #define DHTPIN 0 // PIN0 - PIN2 - PIN16
+// #define DHTTYPE DHT22
 
 //BMP280 ---> I2C PIN 5 - SCL / PIN4 - SDA
 // Adafruit_BMP280 bmp; // sensor bmp conecta pela i2c
@@ -60,6 +60,9 @@ DeviceAddress sensor;
 //Objetos para conexao ao Thingsboard e Node-red
 PubSubClient client(wifiClient);
 PubSubClient mqtt_node(nodeClient);
+
+ESP8266WebServer httpServer(80);
+ESP8266HTTPUpdateServer httpUpdater;
 
 int status = WL_IDLE_STATUS;
 
@@ -80,57 +83,52 @@ void setup()
     client.setServer(thingsboardServer, 1883);
     mqtt_node.setServer(MQTT_ENDERECO_IP , MQTT_PORT);
     mqtt_node.setCallback(callback); // cadastro de tópicos para checagem. Ver funcao callback
-    lastSend = 0;      
-}
+    lastSend = 0;    
+
+  //   MDNS.begin(host);
+  // httpUpdater.setup(&httpServer, update_path, update_username, update_password);
+  // httpServer.begin();
+  // MDNS.addService("http", "tcp", 80);
+  // Serial.printf("HTTPUpdateServer ready! Open http://%s.local%s in your browser and login with username '%s' and password '%s'\n", host, update_path, update_username, update_password);
+  }
 
 void loop()
 {
-
-  // getAndSendTemperatureAndHumidityData();
-  // delay(1000);
-
 /*---------------------------------------------------------------*/
                     /*checa e conecta ao Thingsboard e Node-red */
                     
-    if ((!client.connected()))
-    {
-        reconnect();
-    }
+    if ((!client.connected()))  {reconnect();}
 
-     if ((!mqtt_node.connected()))
-    {
-        reconnect();
-    }
+    if ((!mqtt_node.connected())) {reconnect();}
 
 /*---------------------------------------------------------------*/
       
     client.loop(); // conexao do thingsboard
-     mqtt_node.loop(); // conexao ao node-red
+    mqtt_node.loop(); // conexao ao node-red
+
+  // httpServer.handleClient();
+  // MDNS.update();
 }
 
 
 void getAndSendTemperatureAndHumidityData() //função para envio de dados ao Thingsboard
-{ 
-    
+{     
     barramento.requestTemperatures();
     float tempC = barramento.getTempC(sensor);
-    
-        
+          
     // Check if any reads failed and exit early (to try again).
     if (isnan(tempC) )
     {
-        Serial.println("Failed to read from DHT sensor!");
+        Serial.println("Failed to read sensor!");
         return;
     }
 
        String t = String(tempC);
   
-
     //Prepare a JSON payload string
     String payload = "{";
     payload += "\"temperatura\":";
-    payload += t;
-    
+    payload += t;    
     payload += "}";    
 
     // Send payload
@@ -186,6 +184,7 @@ void reconnect()
 
         Serial.print("Connecting to Thingsboard node ...");
         // Attempt to connect (clientId, username, password)
+
         if ((client.connect("ESP8266 Device", TOKEN, NULL))&&(mqtt_node.connect("teste", MQTT_USERNAME, MQTT_PASSWORD)))
         {
             Serial.println("[DONE]");
@@ -194,8 +193,7 @@ void reconnect()
             mqtt_node.subscribe(TOPICO_SUBS_LED); // topico de estado do led
             mqtt_node.subscribe(TOPICO_SUBS_TB); // topico que grava os dados em arquivo local do broker
             mqtt_node.subscribe(TOPICO_SUBS_NODE); // topico para envio de dados para o dashboard 
-        }
-        
+        }        
 
         else
         {
@@ -203,7 +201,7 @@ void reconnect()
             Serial.print(client.state());
             Serial.println(" : retrying in 5 seconds]");
             // Wait 5 seconds before retrying
-            digitalWrite(LED_BUILTIN, LOW);
+            digitalWrite(LED_BUILTIN, 0);
             delay(5000);
         }
     }

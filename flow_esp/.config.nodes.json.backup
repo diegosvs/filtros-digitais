@@ -860,7 +860,7 @@
                     "e-mail",
                     "e-mail in"
                 ],
-                "enabled": true,
+                "enabled": false,
                 "local": true,
                 "user": false,
                 "module": "node-red-node-email",

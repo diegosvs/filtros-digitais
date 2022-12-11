@@ -1,6 +1,6 @@
 @echo off
 
-node-red --userDir I:\LMM\Area_de_Forca\Manutencao_e_Melhorias\monitor-lmm\filtros-digitais\flow_esp --title temporizador local_flows.json
+node-red --userDir A:\cursos\filtros-digitais\flow_esp\ --title temporizador --port 1880 local_flows.json
 
 exit
 
